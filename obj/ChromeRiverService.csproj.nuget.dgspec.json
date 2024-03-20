@@ -1,0 +1,87 @@
+{
+  "format": 1,
+  "restore": {
+    "C:\\Users\\arandolph\\source\\repos\\ChromeRiver Service\\ChromeRiver Sync Service\\ChromeRiverService.csproj": {}
+  },
+  "projects": {
+    "C:\\Users\\arandolph\\source\\repos\\ChromeRiver Service\\ChromeRiver Sync Service\\ChromeRiverService.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "C:\\Users\\arandolph\\source\\repos\\ChromeRiver Service\\ChromeRiver Sync Service\\ChromeRiverService.csproj",
+        "projectName": "ChromeRiverService",
+        "projectPath": "C:\\Users\\arandolph\\source\\repos\\ChromeRiver Service\\ChromeRiver Sync Service\\ChromeRiverService.csproj",
+        "packagesPath": "C:\\Users\\arandolph\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\arandolph\\source\\repos\\ChromeRiver Service\\ChromeRiver Sync Service\\obj\\",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "C:\\Users\\arandolph\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "net8.0"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "https://api.nuget.org/v3/index.json": {},
+          "https://pkgs.dev.azure.com/fcaspa/b1ba053e-7f9c-44c0-b300-3971777177fe/_packaging/IAM_Repository_Feed/nuget/v3/index.json": {}
+        },
+        "frameworks": {
+          "net8.0": {
+            "targetAlias": "net8.0",
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        }
+      },
+      "frameworks": {
+        "net8.0": {
+          "targetAlias": "net8.0",
+          "dependencies": {
+            "BakerRipley.IAMRepository": {
+              "target": "Package",
+              "version": "[1.0.0-alpha1, )"
+            },
+            "Microsoft.Extensions.Hosting": {
+              "target": "Package",
+              "version": "[8.0.0, )"
+            },
+            "Microsoft.Extensions.Hosting.WindowsServices": {
+              "target": "Package",
+              "version": "[8.0.0, )"
+            },
+            "NLog.Web.AspNetCore": {
+              "target": "Package",
+              "version": "[5.3.8, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.200/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    }
+  }
+}
