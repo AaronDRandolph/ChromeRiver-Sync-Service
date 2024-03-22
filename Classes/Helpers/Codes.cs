@@ -18,9 +18,6 @@ namespace ChromeRiverService.Classes.HelperClasses
             OneUpserted,
             AllUpsertsComplete,
             UncategorizedError,
-            PersonHasInvalidEntityInformation,
-            PersonMissingDepartment,
-            PersonManagerMissing,
             ManuallyCreatedPeopleAreNotUpdated,
             InvalidEntity,
             InvalidAllocation

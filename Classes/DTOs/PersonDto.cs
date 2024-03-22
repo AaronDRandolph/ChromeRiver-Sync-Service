@@ -9,10 +9,10 @@ namespace ChromeRiverService.Classes.DTOs
         public bool? AdminAccess { get; set; } = department?.DepartmentId.Equals((int)Codes.People.ITDepartment);
         public string? FirstName { get; set; } = person.FirstName;
         public string? LastName { get; set; } = person.LastName;
-        public string? Username { get; set; } = person.DomainEntityPeople?.Where(de => de.Active).LastOrDefault()?.EntityName;
+        public string? Username { get; set; } = person.DomainEntityPeople?.LastOrDefault()?.EntityName;
 
         public string? PersonUniqueId { get; set; } = person.EmployeeId;
-        public string? Status { get; set; } = person.CodeIdemploymentStatus.Equals((int)Codes.People.ActiveEmployee) ? "Pending" : "Deleted"; //Our configuration uses "pending" for "active" and "disabled" for "deleted" :)
+        public string? Status { get; set; } = person.CodeIdemploymentStatus.Equals((int)Codes.People.ActiveEmployee) ? "Pending" : "Deleted";
 
         public string? ReportsToPersonUniqueId { get; set; } = manager?.EmployeeId;
         public string? ReportsToPersonName { get; set; } = manager is not null ? $"{manager?.FirstName} {manager?.LastName}" : null;
@@ -32,13 +32,13 @@ namespace ChromeRiverService.Classes.DTOs
         }
         public List<Entities>? PersonEntities { get; set; } =  companyWideRoles.FirstOrDefault(role => role.EmployeeId == person.EmployeeId) is not null ?
         [ 
-            new() {RoleName = "Part Of", EntityTypeCode = "Division",EntityCode = GetDivisionCode(department?.DepartmentName)}, 
+            new() {RoleName = "Part Of", EntityTypeCode = "Division", EntityCode = GetDivisionCode(department?.DepartmentName)}, 
             new() {RoleName = "Part Of", EntityTypeCode = "Department",EntityCode = department?.DepartmentName}, 
             new() {RoleName = companyWideRoles.FirstOrDefault(role => role.EmployeeId == person.EmployeeId)?.ApRole ?? throw new Exception($"Person {person.FirstName} {person.LastName} with Employee Id {person.EmployeeId} is expected to have role"), EntityTypeCode = "Firmwide",EntityCode = "Firmwide"}
         ]
         :  
         [ 
-            new() {RoleName = "Part Of", EntityTypeCode = "Division",EntityCode = GetDivisionCode(department?.DepartmentName)}, 
+            new() {RoleName = "Part Of", EntityTypeCode = "Division", EntityCode = GetDivisionCode(department?.DepartmentName)}, 
             new() {RoleName = "Part Of", EntityTypeCode = "Department",EntityCode = department?.DepartmentName}
         ];
 

@@ -7,6 +7,8 @@ using IAMRepository.Models;
 using IamSyncService.Db.NciCommon;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using System.IO.Pipelines;
+using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -21,7 +23,6 @@ namespace ChromeRiverService.Classes {
         private readonly IIamUnitOfWork _iamUnitOfWork = iamUnitOfWork;
         private readonly INciCommonUnitOfWork _nciCommonUnitOfWork = nciCommonUnitOfWork;
 
-        private const int BatchSize = 100;
         private static int NumUpserted = 0;
         private static int NumNotUpserted = 0;
 
@@ -32,6 +33,7 @@ namespace ChromeRiverService.Classes {
             {   
                 int deactivationWidowLength = 7;
                 string upsertPeopleEndPoint = _config.GetValue<string>("UPSERT_PEOPLE_ENDPOINT") ?? throw new Exception("UPSERT_PEOPLE_ENDPOINT is null");
+                int batchSize = _config.GetValue<int>("UPSERT_PEOPLE_ENDPOINT_BATCH_LIMIT");
 
                 IEnumerable<Person> people = await _iamUnitOfWork.People.GetAll(
                 filter: p => p.IsEmployee.HasValue && p.IsEmployee.Value &&
@@ -45,16 +47,16 @@ namespace ChromeRiverService.Classes {
                 include: source => source
                                 .Include(p => p.PersonPrograms.Where(pp => pp.EndDt == null)).ThenInclude(pp => pp.Program).ThenInclude(p => p.Department)
                                 .Include(p => p.ManagerPeople.Where(mp => mp.EndDt == null)).ThenInclude(mp => mp.ManagerPerson)
-                                .Include(p => p.JobTitles)
-                                .Include(p => p.DomainEntityPeople)
+                                .Include(p => p.JobTitles.Where(jt => jt.EndDt == null))
+                                .Include(p => p.DomainEntityPeople.Where(dp => dp.Active))
                                 .Include(p => p.ContactPeople.Where(cp => cp.ContactTypeId == (int)Codes.People.WorkEmail))
                 );
 
-                IEnumerable<Person[]> peopleBatches = people.Chunk(BatchSize);
+                IEnumerable<IEnumerable<Person>> peopleBatches = people.Chunk(batchSize);
                 IEnumerable<VwChromeRiverGetVendorInfo>? vendorInfo = await _nciCommonUnitOfWork.Vendors.GetAll() ?? throw new Exception("Call to get vendor returned null");
                 IEnumerable<VwGetChromeRiverRoles>? companyWideRoles = await _nciCommonUnitOfWork.Roles.GetAll() ?? throw new Exception("Call to get role returned null");
 
-                foreach (Person[] peopleBatch in peopleBatches)
+                foreach (IEnumerable<Person> peopleBatch in peopleBatches)
                 {
                     List<PersonDto> personDtos = [];
 
@@ -64,114 +66,102 @@ namespace ChromeRiverService.Classes {
                         Department? department = person.PersonPrograms.Where(pp => pp?.Program?.Department != null).FirstOrDefault()?.Program?.Department;
                         PersonDto personDto = new (person,manager,department,vendorInfo,companyWideRoles);
 
-                        string nullPropertiesLog = NullChecker.GetNullPropertiesLog(personDto, $"PersonUniqueId:{personDto.PersonUniqueId ?? "WARNING => NONE"}");
+                        string nullPropertiesLog = NullChecker.GetNullPropertiesLog(personDto, $"[ Name: {personDto.FirstName} {personDto.LastName}, PersonUniqueId:{personDto.PersonUniqueId ?? "WARNING => NONE"} ]");
                         if (nullPropertiesLog.Equals(string.Empty))
-                        {
-                            _logger.LogError(nullPropertiesLog);
-                            NumNotUpserted++;
-                        }
-                        else
                         {
                             personDtos.Add(personDto);
                         }
+                        else
+                        {
+                            _logger.LogError("{log}", nullPropertiesLog);
+                            NumNotUpserted++;
+                        }
                     }
 
-                    HttpResponseMessage response = await _httpHelper.ExecutePost<IEnumerable<PersonDto>>(upsertPeopleEndPoint, personDtos);
+                    HttpResponseMessage? response = await _httpHelper.ExecutePost<IEnumerable<PersonDto>>(upsertPeopleEndPoint, personDtos);
+                    
                     if (response is not null)
                     {
-                        IEnumerable<PersonResponse>? personResponses = JsonSerializer.Deserialize<IEnumerable<PersonResponse>>(response.Content.ReadAsStringAsync().Result) ?? throw new Exception("No response recieved for person upsert");
+                        IEnumerable<PersonResponse>? personResponses = JsonSerializer.Deserialize<IEnumerable<PersonResponse>>(response.Content.ReadAsStringAsync().Result) ?? throw new Exception("PersonResponse Json deserialize error");
+                        int index = 0;
 
                         foreach (PersonResponse personResponse in personResponses)
                         {
-                            if (personResponse.Result.ToLower().Equals("success"))
+
+                            if (personResponse.Result.Equals("success", StringComparison.InvariantCultureIgnoreCase))
                             {
-                                _logger.LogInformation(GetLog(Codes.ResultType.OneUpserted.ToString(), personResponse: personResponse, people: people));
+                                _logger.LogInformation("{log}",GetLog(Codes.ResultType.OneUpserted, personResponse: personResponse, personDto: personDtos[index]));
                                 NumUpserted++;
                             }
                             else
                             {
                                 if (personResponse.ErrorMessage.Contains("Person with username") && personResponse.ErrorMessage.Contains("already exists"))
                                 {
-                                    _logger.LogError(GetLog(Codes.ResultType.ManuallyCreatedPeopleAreNotUpdated.ToString(), personResponse: personResponse, people: people));
-                                }
-                                else if (personResponse.ErrorMessage.Contains("") && personResponse.ErrorMessage.Contains("")) // GET THIS__________________________________________________________________________
-                                {
-                                    _logger.LogError(GetLog(Codes.ResultType.PersonManagerMissing.ToString(), personResponse: personResponse, people: people));
+                                    _logger.LogError("{log}",GetLog(Codes.ResultType.ManuallyCreatedPeopleAreNotUpdated, personResponse: personResponse, personDto: personDtos[index]));
                                 }
                                 else
                                 {
-                                    _logger.LogError(GetLog(Codes.ResultType.UncategorizedError.ToString(), personResponse: personResponse, people: people));
+                                    _logger.LogError("{log}",GetLog(Codes.ResultType.UncategorizedError, personResponse: personResponse, personDto: personDtos[index]));
                                 }
 
                                 NumNotUpserted++;
                             }
 
+                            index++;
                         }
                     }
                     else
                     {
                         NumNotUpserted += personDtos.Count;
-
                     }
                 }
-                _logger.LogInformation(GetLog(Codes.ResultType.AllUpsertsComplete.ToString()));
+
+                _logger.LogInformation("{log}",GetLog(Codes.ResultType.AllUpsertsComplete));
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Error after {NumUpserted} people upserted: {ex.Message}");
+                _logger.LogError("People exception thrown after {NumUpserted} were upserted and {NumNotUpserted} were not sent or returned unsuccessful | Message: {messsage}", NumUpserted, NumNotUpserted, ex.Message);
             }
         }
 
 
-        private class PersonResponse : Response
+        private class PersonResponse : Response 
         {
-            [JsonPropertyName("personUniqueId")]
-            public string PersonUniqueId { get; set; } = "";
-
+            public string PersonUniqueId { get; set; } = "";   // return empty on Success
         }
 
-        private static string GetLog(string resultType, PersonDto? personDto = null, Person? person = null, PersonResponse? personResponse = null, IEnumerable<Person>? people = null)
+
+        private static string GetLog(Codes.ResultType resultType, PersonDto? personDto = null, Person? person = null, PersonResponse? personResponse = null)
         {
-            if (resultType.Equals(Codes.ResultType.AllUpsertsComplete.ToString()))
+            string pipe = " | ";
+
+            StringBuilder log = new StringBuilder("Upsert Type: People")
+                             .Append(pipe).Append($"Result Type: {RegexHelper.PlaceSpacesBeforeUppercase(resultType.ToString())}");
+
+            if (resultType.Equals(Codes.ResultType.AllUpsertsComplete))
             {
-                return $"Total Users Upserted: {NumUpserted} \n Total Users Not Upserted: {NumNotUpserted}";
+                return   log.Append(pipe).Append($"Total People Upserted: {NumUpserted}")
+                            .Append(pipe).Append($"Total People Not Upserted: {NumNotUpserted}")
+                            .ToString();
+            }
+            else if ( personDto is not null)
+            {
+                 log.Append(pipe).Append($"Name: {personDto.FirstName} {personDto.LastName}")
+                    .Append(pipe).Append($"Employee ID: {personDto.PersonUniqueId}");
+
+                if (personResponse is not null && !personResponse.ErrorMessage.Equals(string.Empty))
+                {
+                         log.Append(pipe).Append($"Error Message: {personResponse.ErrorMessage}")
+                            .Append(pipe).Append($"Dto: {JsonSerializer.Serialize(personDto)}");
+                }
+
+                return log.ToString();
             }
             else
             {
-                StringBuilder log = new($"Upsert Type: People | Result Type: {RegexHelper.PlaceSpacesBeforeUppercase(resultType)}");
-                string pipe = " | ";
-
-                if (person is not null)
-                {
-                    log.Append(pipe).Append($"Name: {person.FirstName} {person.LastName}");
-                    log.Append(pipe).Append($"Employee ID: {person.EmployeeId}");
-                    return log.ToString();
-                }
-                else if (personDto is not null)
-                {
-                    log.Append(pipe).Append($"Name: {personDto.FirstName} {personDto.LastName}");
-                    log.Append(pipe).Append($"Employee ID: {personDto.PersonUniqueId}");
-                    return log.ToString();
-                }
-                else if (personResponse is not null && people is not null)
-                {
-                    Person? mappedPerson = people.ToList().Find(p => p.EmployeeId == personResponse.PersonUniqueId);
-                    if (mappedPerson is not null)
-                    {
-                        log.Append(pipe).Append($"Name: {mappedPerson.FirstName} {mappedPerson.LastName}");
-                        log.Append(pipe).Append($"Employee ID: {mappedPerson.EmployeeId}");
-                        log.Append(pipe).Append($"ErrorMessage: {personResponse.ErrorMessage}");
-                        return log.ToString();
-                    }
-                    
-                    throw new Exception("Person object required to create an error log");
-                }
-
-                throw new Exception("Person object required to create an error log");
+                throw new Exception("no person type found to create an error log");
             }
-    
         }
-
     }
 }
 

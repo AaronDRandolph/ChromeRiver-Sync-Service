@@ -20,8 +20,8 @@ public class Worker : BackgroundService
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         bool upsertEntities = true;
-        bool upsertPeople = false;
-        bool upsertAllocations = false;
+        bool upsertPeople = true;
+        bool upsertAllocations = true;
 
         if (upsertEntities)
         {

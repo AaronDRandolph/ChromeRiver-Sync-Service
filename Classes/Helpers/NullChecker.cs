@@ -8,26 +8,16 @@ namespace ChromeRiverService.Classes.HelperClasses
 {
     public class NullChecker
     {
-        //public static IEnumerable<Object?> ConstainsNullProperty<T>(T obj) where T : class
-        //{
-        //    return obj.GetType()
-        //            .GetProperties()
-        //            .Select(prop => prop.GetValue(obj))
-        //            .Where(value => value == null);
-        //}
-
         private static List<string> nulls = [];
 
          public static string GetNullPropertiesLog<T>(T obj, string uid) where T : class
         {
             StringBuilder log = new($"Type: {typeof(T)} with uid {uid} not sent due to null attributes => ");
-
             AddNulls(obj);
-
-            log.Append(string.Join(", ", nulls));
+            string logString = nulls.Count > 0 ? log.Append(string.Join(", ", nulls)).ToString() : string.Empty;
             nulls.Clear();
 
-            return log.ToString();
+            return logString;
         }
 
         private static void AddNulls(Object obj, string? parentAtribute = null)
@@ -54,7 +44,7 @@ namespace ChromeRiverService.Classes.HelperClasses
                     }
                 }
 
-                if ((prop.ReflectedType?.Name.Equals(nameof(PersonDto)) ?? false) && propName == "Entities")
+                if ((prop.ReflectedType?.Name.Equals(nameof(PersonDto)) ?? false) && propName == "PersonEntities")
                 {
                     List<PersonDto.Entities>? personEntityObjects = (List<PersonDto.Entities>?)prop.GetValue(obj);
                     if (personEntityObjects is not null)
