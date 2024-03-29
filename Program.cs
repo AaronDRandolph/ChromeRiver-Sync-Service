@@ -1,11 +1,11 @@
-using ChromeRiverService;
-using ChromeRiverService.Classes;
 using ChromeRiverService.Classes.HelperClasses;
 using ChromeRiverService.Db.Iam;
 using ChromeRiverService.Interfaces;
+using ChromeRiverService.UOW;
 using IamSyncService.Db.NciCommon;
 using Microsoft.EntityFrameworkCore;
 using NLog.Extensions.Logging;
+using AutoMapper;
 
 namespace ChromeRiverService
 {
@@ -30,13 +30,12 @@ namespace ChromeRiverService
                 options.UseSqlServer(builder.Configuration["NCI_LOCAL_CONNECTION_STRING"]);   // this needs to be environment based
             }, ServiceLifetime.Transient, ServiceLifetime.Transient);
 
-            // Singletons
+            // Transients 
             builder.Services.AddTransient<IIamUnitOfWork, IamUnitOfWork>();
             builder.Services.AddTransient<INciCommonUnitOfWork,NciCommonUnitOfWork>();
-            builder.Services.AddTransient<IEntities,Entities>();
-            builder.Services.AddTransient<IPeople,People>();
-            builder.Services.AddTransient<IAllocations,Allocations>();
             builder.Services.AddTransient<IHttpHelper,HttpHelper>();
+            builder.Services.AddTransient<ISynchUnitOfWork,SynchUnitOfWork>();
+
 
             //Client Factory
             builder.Services.AddHttpClient("ChromeRiver", httpClient =>
@@ -45,6 +44,9 @@ namespace ChromeRiverService
                 httpClient.DefaultRequestHeaders.TryAddWithoutValidation("x-api-key", builder.Configuration["CHROME_RIVER_API_KEY_TEST"]); // this needs to be environment based
                 httpClient.DefaultRequestHeaders.TryAddWithoutValidation("customer-code", builder.Configuration["CHROME_RIVER_API_CUSTOMER_CODE"]);
             });
+
+            //Automapper
+            builder.Services.AddAutoMapper(typeof(Program).Assembly);
 
             var host = builder.Build();
             host.Run();
