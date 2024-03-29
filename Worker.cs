@@ -1,5 +1,4 @@
 using ChromeRiverService.Interfaces;
-using System.Text.Json;
 using Task = System.Threading.Tasks.Task;
 
 namespace ChromeRiverService;

@@ -1,20 +1,16 @@
-
-using System.Text.Json.Serialization;
-using ChromeRiverService.Db.NciCommon.DbViewsModels;
-
 namespace ChromeRiverService.Classes.DTOs
 {
-  public class AllocationDto(VwChromeRiverGetAllAllocation allocation, string? closeDate = "")
+    public class AllocationDto()
     {
-        public string? AllocationName { get; set; } = allocation.AllocationName;
-        public string? AllocationNumber { get; set; } = allocation.AllocationNumber;
-        public string? ClientName { get; set; } = allocation.ClientName;
-        public string? ClientNumber { get; set; } = allocation.ClientNumber;
-        public string? Currency { get; set; } = "USD";
-        public string? ClosedDate { get; set; } = closeDate;
-        public string? Type { get; set; } = allocation.Type;
-        public string? Locale { get; set; } = "en";
-        public string? OnSelect1EntityTypeCode { get; set; } = allocation.OnSelect1EntityTypeCode;
-        public string? OnSelect2EntityTypeCode { get; set; } = allocation.OnSelect2EntityTypeCode;
+        public string? AllocationName {get; set;}
+        public string? AllocationNumber {get; set;}
+        public string? ClientName  {get; set;}
+        public string? ClientNumber  {get; set;}
+        public string? Currency  {get; set;}
+        public string ClosedDate {get; set;} = "";
+        public string? Type  {get; set;}
+        public string? Locale  {get; set;}
+        public string? OnSelect1EntityTypeCode  {get; set;}
+        public string? OnSelect2EntityTypeCode  {get; set;}
     }
 }

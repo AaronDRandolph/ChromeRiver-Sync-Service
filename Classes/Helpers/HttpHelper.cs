@@ -10,7 +10,7 @@ namespace ChromeRiverService.Classes.HelperClasses
     {
         readonly ILogger<Worker> _logger = logger;
         readonly HttpClient _http = _httpClientFactory.CreateClient("ChromeRiver");
-        JsonSerializerOptions options = new(JsonSerializerDefaults.Web);
+        readonly JsonSerializerOptions options = new(JsonSerializerDefaults.Web);
 
         public async Task<HttpResponseMessage?> ExecutePost<T>(string endPoint, T dtoList) where T : class
         {

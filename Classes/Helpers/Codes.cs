@@ -18,9 +18,15 @@ namespace ChromeRiverService.Classes.HelperClasses
             OneUpserted,
             AllUpsertsComplete,
             UncategorizedError,
-            ManuallyCreatedPeopleAreNotUpdated,
+            PotentiallyConflictsWithManuallyCreatedPerson,
             InvalidEntity,
             InvalidAllocation
+        }
+
+        public enum HttpResponses
+        {
+            AllUpsertedSuccessfully = 200,
+            SomeUpsertedSuccessfully = 207,
         }
     }
 }

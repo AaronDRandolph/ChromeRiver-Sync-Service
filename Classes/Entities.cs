@@ -1,6 +1,6 @@
-using System.IO.Pipelines;
 using System.Text;
 using System.Text.Json;
+using AutoMapper;
 using ChromeRiverService.Classes.DTOs;
 using ChromeRiverService.Classes.HelperClasses;
 using ChromeRiverService.Db.NciCommon.DbViewsModels;
@@ -8,12 +8,13 @@ using ChromeRiverService.Interfaces;
 using IamSyncService.Db.NciCommon;
 
 namespace ChromeRiverService.Classes {
-    public class Entities (INciCommonUnitOfWork nciCommonUnitOfWork, IConfiguration configuration, ILogger<Worker> logger, IHttpHelper httpHelper) : IEntities
+    public class Entities (INciCommonUnitOfWork nciCommonUnitOfWork, IConfiguration configuration, ILogger<Worker> logger, IHttpHelper httpHelper, IMapper mapper) : IEntities
     {
         private readonly IConfiguration _config = configuration;
         private readonly ILogger<Worker> _logger = logger;
         private readonly IHttpHelper _httpHelper = httpHelper;
         private readonly INciCommonUnitOfWork _nciCommonUnitOfWork = nciCommonUnitOfWork;
+        private readonly IMapper _mapper = mapper;
 
         private static int NumUpserted = 0;
         private static int NumNotUpserted = 0;
@@ -24,55 +25,80 @@ namespace ChromeRiverService.Classes {
             {
                 string upsertEntitiesEndpoint = _config.GetValue<string>("UPSERT_ENTITIES_ENDPOINT") ?? throw new Exception("Upsert entities endpoint not found");
                 int batchSize = _config.GetValue<int>("UPSERT_ENTITIES_ENDPOINT_BATCH_LIMIT");
+                int batchNum = 0;
 
                 IEnumerable<VwChromeRiverGetAllEntity> entities = await _nciCommonUnitOfWork.Entities.GetAll();
                 IEnumerable<IEnumerable<VwChromeRiverGetAllEntity>> entityBatches = entities.Chunk<VwChromeRiverGetAllEntity>(batchSize.Equals(0) ? throw new Exception("Allocation batch size cannot be 0") : batchSize);
 
                 foreach (IEnumerable<VwChromeRiverGetAllEntity> entityBatch in entityBatches)
                 {
-                    List<EntityDto> entityDtos = [];
+                    batchNum++;
 
-                    foreach (VwChromeRiverGetAllEntity entity in entityBatch)
+                    try
                     {
-                        EntityDto entityDto = new(entity);
+                        IList<EntityDto> entityDtos = [];
 
-                        string nullPropertiesLog = NullChecker.GetNullPropertiesLog(entityDto,$"[ Type: '{entityDto.EntityTypeCode}', Code:'{entityDto.EntityCode}' ]");
-                        if (nullPropertiesLog.Equals(string.Empty))
+                        foreach (VwChromeRiverGetAllEntity entity in entityBatch)
                         {
-                            entityDtos.Add(entityDto);
-                        }
-                        else
-                        {
-                            _logger.LogError("{log}", nullPropertiesLog);
-                            NumNotUpserted++;
-                        }
-                    }
-
-                    HttpResponseMessage? response = await _httpHelper.ExecutePost<IEnumerable<EntityDto>>(upsertEntitiesEndpoint, entityDtos);
-
-                    if (response is not null)
-                    {
-                        IEnumerable<EntityResponse>? entitiesResponses = JsonSerializer.Deserialize<IEnumerable<EntityResponse>>(response.Content.ReadAsStringAsync().Result) ?? throw new Exception("EntityResponse Json deserialize error");
-                        int index = 0;
-
-                        foreach (EntityResponse entityResponse in entitiesResponses)
-                        {
-                            if (entityResponse.Result.Equals("success",StringComparison.InvariantCultureIgnoreCase))
+                            try
                             {
-                                NumUpserted++;
+                                EntityDto entityDto = _mapper.Map<VwChromeRiverGetAllEntity, EntityDto>(entity);
+                                entityDtos.Add(entityDto);
+                            }
+                            catch (Exception ex)
+                            {
+                                _logger.LogError("Error thrown while mapping entity '{entitiyName}': {log}", entity.EntityName, ex);
+                                NumNotUpserted++;
+                            }
+                        }
+
+                        HttpResponseMessage? response = await _httpHelper.ExecutePost<IEnumerable<EntityDto>>(upsertEntitiesEndpoint, entityDtos);
+
+                        if (response is not null)
+                        {
+                            if (((int)response.StatusCode).Equals((int)Codes.HttpResponses.AllUpsertedSuccessfully))
+                            {
+                                NumUpserted += entityDtos.Count;
+                            }
+                            else if (((int)response.StatusCode).Equals((int)Codes.HttpResponses.SomeUpsertedSuccessfully))
+                            {
+                                JsonSerializerOptions options = new(JsonSerializerDefaults.Web);
+                                IEnumerable<EntityResponse>? entitiesResponses = JsonSerializer.Deserialize<IEnumerable<EntityResponse>>(response.Content.ReadAsStringAsync().Result, options) ?? throw new Exception("EntityResponse Json deserialize error");
+                                int index = 0;
+
+                                foreach (EntityResponse entityResponse in entitiesResponses)
+                                {
+                                    if (entityResponse.Result.Equals("success", StringComparison.InvariantCultureIgnoreCase))
+                                    {
+                                        NumUpserted++;
+                                    }
+                                    else
+                                    {
+                                        _logger.LogError("{log}", GetLog(Codes.ResultType.InvalidEntity.ToString(), entityResponse, entityDtos[index]));
+                                        NumNotUpserted++;
+                                    }
+                                    index++;
+                                }
                             }
                             else
                             {
-                                _logger.LogError("{log}", GetLog(Codes.ResultType.InvalidEntity.ToString(), entityResponse, entityDtos[index]));
-                                NumNotUpserted++;
+                                throw new Exception("Success message type not handled");
                             }
-                            index++;
                         }
+                        else
+                        {
+                            _logger.LogError("The response for entity batch #{batchNum} returned a null", batchNum);
+                            NumNotUpserted += entityDtos.Count;
+                        }
+                        break;
+
                     }
-                    else
+                    catch (Exception ex) 
                     {
-                        NumNotUpserted += entityDtos.Count;
+                        _logger.LogError("Exception thrown while processing entity batch #{batchNum}: {ex}", batchNum, ex);
                     }
+                    break;
+
                 }
 
                 _logger.LogInformation("{log}", GetLog(Codes.ResultType.AllUpsertsComplete.ToString()));
@@ -84,19 +110,12 @@ namespace ChromeRiverService.Classes {
         }
 
 
-        private class EntityResponse : Response   // These return null on success
-        {
-            public string? EntityCode { get; set; }
-            public string? EntityTypeCode { get; set; }
-        }
-
-
 
         private static string GetLog(string resultType, EntityResponse? entityResponse = null, EntityDto? mappedDto = null)
         {
             string pipe = " | ";
 
-            StringBuilder log = new StringBuilder("Upsert Type: Allocations")
+            StringBuilder log = new StringBuilder("Upsert Type: Entities")
                              .Append(pipe).Append($"Result Type: {RegexHelper.PlaceSpacesBeforeUppercase(resultType)}");
 
             if (resultType.Equals(Codes.ResultType.AllUpsertsComplete.ToString()))
