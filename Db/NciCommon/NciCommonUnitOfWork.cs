@@ -1,10 +1,7 @@
 
-using System.Runtime.CompilerServices;
-using ChromeRiverService.Db.NciCommon.DbViewsModels;
 using ChromeRiverService.Db.NciCommon.Interfaces;
 using ChromeRiverService.Db.NciCommon.Repositories;
 using IamSyncService.Db.NciCommon;
-using Microsoft.EntityFrameworkCore;
 
 namespace ChromeRiverService 
 {
