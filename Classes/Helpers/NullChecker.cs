@@ -1,4 +1,5 @@
 using ChromeRiverService.Classes.DTOs;
+using ChromeRiverService.Classes.DTOs.Subclasses;
 using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
@@ -8,7 +9,7 @@ namespace ChromeRiverService.Classes.HelperClasses
 {
     public class NullChecker
     {
-        private static List<string> nulls = [];
+        private static ICollection<string> nulls = [];
 
          public static string GetNullPropertiesLog<T>(T obj, string uid) where T : class
         {
@@ -34,10 +35,10 @@ namespace ChromeRiverService.Classes.HelperClasses
                 // handle list of subclasses
                 if ((prop.ReflectedType?.Name.Equals(nameof(EntityDto)) ?? false) && propName == "EntityNames")
                 {
-                    List<EntityDto.EntityName>? entityNameObjs = (List<EntityDto.EntityName>?)prop.GetValue(obj);
+                    ICollection<EntityName>? entityNameObjs = (ICollection<EntityName>?)prop.GetValue(obj);
                     if (entityNameObjs is not null)
                     {
-                        foreach(EntityDto.EntityName entityNameObj in entityNameObjs)
+                        foreach(EntityName entityNameObj in entityNameObjs)
                         {
                             AddNulls(entityNameObj,propName);
                         }
@@ -46,10 +47,10 @@ namespace ChromeRiverService.Classes.HelperClasses
 
                 if ((prop.ReflectedType?.Name.Equals(nameof(PersonDto)) ?? false) && propName == "PersonEntities")
                 {
-                    List<PersonDto.Entities>? personEntityObjects = (List<PersonDto.Entities>?)prop.GetValue(obj);
+                    ICollection<PersonEntity>? personEntityObjects = (ICollection<PersonEntity>?)prop.GetValue(obj);
                     if (personEntityObjects is not null)
                     {
-                        foreach (PersonDto.Entities personEntityObject in personEntityObjects)
+                        foreach (PersonEntity personEntityObject in personEntityObjects)
                         {
                             AddNulls(personEntityObject,propName);
                         }
