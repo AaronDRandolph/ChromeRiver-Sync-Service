@@ -127,3 +127,5 @@ C:\Users\arandolph\source\repos\ChromeRiver Service\ChromeRiver Sync Service\obj
 C:\Users\arandolph\source\repos\ChromeRiver Service\ChromeRiver Sync Service\obj\Debug\net8.0\ChromeRiverService.pdb
 C:\Users\arandolph\source\repos\ChromeRiver Service\ChromeRiver Sync Service\obj\Debug\net8.0\ChromeRiverService.genruntimeconfig.cache
 C:\Users\arandolph\source\repos\ChromeRiver Service\ChromeRiver Sync Service\obj\Debug\net8.0\ref\ChromeRiverService.dll
+C:\Users\arandolph\source\repos\ChromeRiver Service\ChromeRiver Sync Service\bin\Debug\net8.0\AutoMapper.dll
+C:\Users\arandolph\source\repos\ChromeRiver Service\ChromeRiver Sync Service\bin\Debug\net8.0\Automapper\JSON\DivisionMappings.json

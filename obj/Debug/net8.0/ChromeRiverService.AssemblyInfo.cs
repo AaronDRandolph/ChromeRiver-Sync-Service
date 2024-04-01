@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("ChromeRiverService")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+e31f2ec76dbe4a7fa3c9294cb4a4f5ee4492ec52")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+3ae5a4b756f9dc962f914c4d230441291d0d2fd2")]
 [assembly: System.Reflection.AssemblyProductAttribute("ChromeRiverService")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ChromeRiverService")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

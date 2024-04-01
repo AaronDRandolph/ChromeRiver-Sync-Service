@@ -1,9 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "KJZe6gGCpz4jJ+CiWOv4VWjYLGax0xzjW62yxkKLk5i7RL0BJpGX5z+nqGgBvCHINwSdTY2MXY0oM+xKTI9DoQ==",
+  "dgSpecHash": "DopA20d16z4KW/Pq2M3Z2BnaJBtRPuENC9yF+986ilR+RsPep/tLqDB77JfGjeYpirWIR1AMuz+OaIg4PgHXUg==",
   "success": true,
   "projectFilePath": "C:\\Users\\arandolph\\source\\repos\\ChromeRiver Service\\ChromeRiver Sync Service\\ChromeRiverService.csproj",
   "expectedPackageFiles": [
+    "C:\\Users\\arandolph\\.nuget\\packages\\automapper\\13.0.1\\automapper.13.0.1.nupkg.sha512",
     "C:\\Users\\arandolph\\.nuget\\packages\\azure.core\\1.35.0\\azure.core.1.35.0.nupkg.sha512",
     "C:\\Users\\arandolph\\.nuget\\packages\\azure.identity\\1.10.3\\azure.identity.1.10.3.nupkg.sha512",
     "C:\\Users\\arandolph\\.nuget\\packages\\bakerripley.iamrepository\\1.0.0-alpha1\\bakerripley.iamrepository.1.0.0-alpha1.nupkg.sha512",
