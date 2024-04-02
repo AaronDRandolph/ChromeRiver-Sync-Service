@@ -35,7 +35,7 @@ namespace ChromeRiverService.Classes.HelperClasses
             }
             catch (Exception ex)
             {
-                _logger.LogError("{log}", ex);
+                _logger.LogError(ex,"Expection thrown while executing post");
                 return null;
             }
         }

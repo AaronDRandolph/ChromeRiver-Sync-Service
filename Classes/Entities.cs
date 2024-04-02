@@ -47,7 +47,7 @@ namespace ChromeRiverService.Classes {
                             }
                             catch (Exception ex)
                             {
-                                _logger.LogError("Error thrown while mapping entity '{entitiyName}': {ex}", entity.EntityName, ex);
+                                _logger.LogError(ex,$"Expection thrown while mapping entity '{entity.EntityName}'");
                                 NumNotUpserted++;
                             }
                         }
@@ -82,7 +82,7 @@ namespace ChromeRiverService.Classes {
                                     }
                                     catch (Exception ex)
                                     {
-                                        _logger.LogError("Entities Exception: {ex}", ex);
+                                        _logger.LogError(ex, "Expection processing entity upsert responses");
                                     }
                                 }
                             }
@@ -99,7 +99,7 @@ namespace ChromeRiverService.Classes {
                     }
                     catch (Exception ex) 
                     {
-                        _logger.LogError("Exception thrown while processing entity batch #{batchNum}: {ex}", batchNum, ex);
+                        _logger.LogError(ex, $"Exception thrown while processing entities batch #{batchNum}");
                     }
                 }
 
@@ -107,7 +107,7 @@ namespace ChromeRiverService.Classes {
             }
             catch (Exception ex)
             {
-                _logger.LogError("Entity exception thrown after {NumUpserted} were upserted and {NumNotUpserted} were not sent or returned unsuccessful | Message: {messsage}", NumUpserted, NumNotUpserted, ex.Message);
+                _logger.LogError(ex,$"Entity exception thrown after {NumUpserted} were upserted and {NumNotUpserted} were not sent or returned unsuccessful");
             }
         }
     }

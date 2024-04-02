@@ -81,7 +81,7 @@ namespace ChromeRiverService.Classes
                             }
                             catch (Exception ex)
                             {
-                                _logger.LogError("Exception thrown while mapping personDto: {dto} | Excpection: {ex}", JsonSerializer.Serialize(personDto), ex);
+                                _logger.LogError(ex,$"Exception thrown while mapping personDto: {JsonSerializer.Serialize(personDto)}");
                                 NumNotUpserted++;
                             }
                         }
@@ -128,7 +128,7 @@ namespace ChromeRiverService.Classes
                                     }
                                     catch (Exception ex)
                                     {
-                                        _logger.LogError("People Exception: {ex}", ex);
+                                        _logger.LogError(ex , "Expection processing person upsert responses");
 
                                     }
 
@@ -149,7 +149,7 @@ namespace ChromeRiverService.Classes
                     }
                     catch (Exception ex)    
                     {
-                        _logger.LogError("Error Thrown while processing people batch #{batchNum}: {ex}", batchNum, ex);
+                        _logger.LogError(ex, $"Exception thrown while processing people batch #{batchNum}");
                     }
                 }
 
@@ -157,7 +157,7 @@ namespace ChromeRiverService.Classes
             }
             catch (Exception ex)
             {
-                _logger.LogError("People exception thrown after {NumUpserted} were upserted and {NumNotUpserted} were not sent or returned unsuccessful | Message: {messsage}", NumUpserted, NumNotUpserted, ex.Message);
+                _logger.LogError(ex,$"People exception thrown after {NumUpserted} were upserted and {NumNotUpserted} were not sent or returned unsuccessful");
             }
         }
     }

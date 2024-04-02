@@ -51,7 +51,7 @@ namespace ChromeRiverService.Classes {
                             }
                             catch (Exception ex)
                             {
-                                _logger.LogError("Exception thrown while mapping Allocation Number '{allocationNumber}': {ex}", allocation.AllocationNumber, ex);
+                                _logger.LogError(ex, $"Exception thrown while mapping Allocation Number '{allocation.AllocationNumber}'");
                                 NumNotUpserted++;
                             }
                         }
@@ -84,7 +84,7 @@ namespace ChromeRiverService.Classes {
                                         }
                                         catch (Exception ex) 
                                         {
-                                            _logger.LogError("Allocation Exception: {ex}", ex);
+                                            _logger.LogError(ex, "Expection processing allocation upsert responses");
                                         }
                                     }
                                 }                                
@@ -102,7 +102,7 @@ namespace ChromeRiverService.Classes {
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogError("Exception thrown while processing allocation batch #{batchNum}: {ex}", batchNum, ex);
+                        _logger.LogError(ex, $"Exception thrown while processing allocation batch #{batchNum}");
                     }
                 }
 
@@ -110,7 +110,7 @@ namespace ChromeRiverService.Classes {
             }
             catch (Exception ex)
             {
-                _logger.LogError("Allocations exception thrown after {NumUpserted} were upserted and {NumNotUpserted} were not sent or returned unsuccessful | Message : {messsage}", NumUpserted, NumNotUpserted, ex.Message);
+                _logger.LogError(ex,$"Allocations exception thrown after {NumUpserted} were upserted and {NumNotUpserted} were not sent or returned unsuccessful");
             }
         }
     }
