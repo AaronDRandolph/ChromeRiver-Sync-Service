@@ -66,7 +66,7 @@ namespace ChromeRiverService.Classes {
                             else if (((int)response.StatusCode).Equals((int)Codes.HttpResponses.SomeUpsertedSuccessfully))
                             {
                                 JsonSerializerOptions options = new(JsonSerializerDefaults.Web);
-                                IEnumerable<AllocationResponse>? allocationResponses = JsonSerializer.Deserialize<IEnumerable<AllocationResponse>>(response.Content.ReadAsStringAsync().Result, options) ?? throw new Exception("AllocationResponse Json deserialize error");
+                                IEnumerable<AllocationResponse> allocationResponses = JsonSerializer.Deserialize<IEnumerable<AllocationResponse>>(response.Content.ReadAsStringAsync().Result, options) ?? throw new Exception("AllocationResponse Json deserialize error");
 
                                 foreach (AllocationResponse allocationResponse in allocationResponses)
                                 {
@@ -76,19 +76,27 @@ namespace ChromeRiverService.Classes {
                                     }
                                     else
                                     {
-                                        _logger.LogError("{log}", GetLog(Codes.ResultType.InvalidAllocation, allocationResponse));
-                                        NumNotUpserted++;
+                                        try
+                                        {
+                                            AllocationDto currentAllocation = allocationDtos.FirstOrDefault(dto => allocationResponse.AllocationId.Equals($"{dto.AllocationNumber}_{dto.Type}", StringComparison.InvariantCultureIgnoreCase)) ?? throw new Exception($"Allocation response with ID (Allocation.AllocationNumber_Allocation.Type) {allocationResponse.AllocationId} could not be mapped to a dto for error messaging");
+                                            _logger.LogError("Upsert Type: Allocations | Result Type: All Allocations Upserted | Error: {ErrorMessage} | AllocationDto: {dto}", allocationResponse.ErrorMessage, JsonSerializer.Serialize(currentAllocation));
+                                            NumNotUpserted++;
+                                        }
+                                        catch (Exception ex) 
+                                        {
+                                            _logger.LogError("Allocation Exception: {ex}", ex);
+                                        }
                                     }
                                 }                                
                             }
                             else
                             {
-                                throw new Exception("Success message type not handled");
+                                throw new Exception("Allocations success message type not handled");
                             }
                         }
                         else
                         {
-                            _logger.LogError("The response for allocation batch #{batchNum} returned a null *************************************************************************************************", batchNum);
+                            _logger.LogError("The response for allocation batch #{batchNum} returned a null", batchNum);
                             NumNotUpserted += allocationDtos.Count;
                         }
                     }
@@ -96,40 +104,13 @@ namespace ChromeRiverService.Classes {
                     {
                         _logger.LogError("Exception thrown while processing allocation batch #{batchNum}: {ex}", batchNum, ex);
                     }
-                    break;
                 }
 
-                _logger.LogInformation("{log}", GetLog(Codes.ResultType.AllUpsertsComplete));
+                _logger.LogInformation("Allocations Upsert Complete | Total Allocations Upserted: {NumUpserted} | Total Allocations Not Upserted: {NumNotUpserted}", NumUpserted, NumNotUpserted);
             }
             catch (Exception ex)
             {
                 _logger.LogError("Allocations exception thrown after {NumUpserted} were upserted and {NumNotUpserted} were not sent or returned unsuccessful | Message : {messsage}", NumUpserted, NumNotUpserted, ex.Message);
-            }
-        }
-        
-
-        private static string GetLog(Codes.ResultType resultType, AllocationResponse? allocationResponse = null, AllocationDto? mappedDto = null) 
-        {
-            string pipe = " | ";
-
-            StringBuilder log = new StringBuilder("Upsert Type: Allocations")
-                             .Append(pipe).Append($"Result Type: {RegexHelper.PlaceSpacesBeforeUppercase(resultType.ToString())}");
-
-            if (resultType.Equals(Codes.ResultType.AllUpsertsComplete))
-            {
-                return   log.Append(pipe).Append($"Total Allocations Upserted: {NumUpserted}")
-                            .Append(pipe).Append($"Total Allocations Not Upserted: {NumNotUpserted}")
-                            .ToString();
-            }
-            else if (allocationResponse is not null) 
-            {
-                return   log.Append(pipe).Append($"Error: ${allocationResponse.ErrorMessage}")
-                            .Append(pipe).Append($"AllocationID (AllocationNumber_ClientNumber): {allocationResponse.AllocationId}")
-                            .ToString();                
-            } 
-            else
-            {
-                throw new Exception("allocationResponse and mapped dto objects required to create allocation error log");
             }
         }
     }

@@ -69,9 +69,11 @@ namespace ChromeRiverService.Classes
                     { 
                         foreach (Person person in peopleBatch)
                         {
+                            PersonDto? personDto = new();
+
                             try
                             {
-                                PersonDto personDto = _mapper.Map<Person, PersonDto>(person);
+                                personDto = _mapper.Map<Person, PersonDto>(person);
                                 _mapper.Map(vendorInfo, personDto);
                                 _mapper.Map(companyWideRoles, personDto);
 
@@ -79,7 +81,7 @@ namespace ChromeRiverService.Classes
                             }
                             catch (Exception ex)
                             {
-                                _logger.LogError("Exception thrown while mapping {firstName} {lastName} with employee id '{EmployeeID}': {ex}", person.FirstName, person.LastName, person.EmployeeId, ex);
+                                _logger.LogError("Exception thrown while mapping personDto: {dto} | Excpection: {ex}", JsonSerializer.Serialize(personDto), ex);
                                 NumNotUpserted++;
                             }
                         }
@@ -91,46 +93,52 @@ namespace ChromeRiverService.Classes
                             if (((int)response.StatusCode).Equals((int)Codes.HttpResponses.AllUpsertedSuccessfully))
                             {
                                 NumUpserted += personDtos.Count;
-
-                                foreach (PersonDto personDto in personDtos)
-                                {
-                                    _logger.LogInformation("{log}", GetLog(Codes.ResultType.OneUpserted, personDto: personDto));
-                                }
+                                _logger.LogInformation("All people in the batch where successfully upserted: {successBatch}", JsonSerializer.Serialize(personDtos));
                             }
                             else if (((int)response.StatusCode).Equals((int)Codes.HttpResponses.SomeUpsertedSuccessfully))
                             {
                                 JsonSerializerOptions options = new(JsonSerializerDefaults.Web);
-                                IEnumerable<PersonResponse>? personResponses = JsonSerializer.Deserialize<IEnumerable<PersonResponse>>(response.Content.ReadAsStringAsync().Result, options) ?? throw new Exception("PersonResponse Json deserialize error");
-                                int index = 0;
+                                IEnumerable<PersonResponse> personResponses = JsonSerializer.Deserialize<IEnumerable<PersonResponse>>(response.Content.ReadAsStringAsync().Result, options) ?? throw new Exception("PersonResponse Json deserialize error");
+                                ICollection<PersonDto> successfulPeople = [];
 
                                 foreach (PersonResponse personResponse in personResponses)
                                 {
+                                    try
+                                    {
+                                        PersonDto currentPersonDto = personDtos.FirstOrDefault(p => p.PersonUniqueId == personResponse.PersonUniqueId) ?? throw new Exception($"Person response with PersonUniqueId {personResponse.PersonUniqueId} could not be mapped to a dto for either success or error messaging");
 
-                                    if (personResponse.Result.Equals("success", StringComparison.InvariantCultureIgnoreCase))
-                                    {
-                                        _logger.LogInformation("{log}", GetLog(Codes.ResultType.OneUpserted, personResponse: personResponse, personDto: personDtos[index]));
-                                        NumUpserted++;
-                                    }
-                                    else
-                                    {
-                                        if (personResponse.ErrorMessage.Contains("Person with username") && personResponse.ErrorMessage.Contains("already exists"))
+                                        if (personResponse.Result.Equals("success", StringComparison.InvariantCultureIgnoreCase))
                                         {
-                                            _logger.LogError("{log}", GetLog(Codes.ResultType.PotentiallyConflictsWithManuallyCreatedPerson, personResponse: personResponse, personDto: personDtos[index]));
+                                            successfulPeople.Add(currentPersonDto);
+                                            NumUpserted++;
                                         }
                                         else
                                         {
-                                            _logger.LogError("{log}", GetLog(Codes.ResultType.UncategorizedError, personResponse: personResponse, personDto: personDtos[index]));
-                                        }
+                                            if (personResponse.ErrorMessage.Contains("Person with username") && personResponse.ErrorMessage.Contains("already exists"))
+                                            {
+                                                _logger.LogError("Person not updated because the username is already in use, this can happen if the person was manually created and there is a disconnect with the persons service object, or if there is duplicate entity names in the database | Name: {firstName} {lastName} | Employee ID: {employeeID}", currentPersonDto.FirstName, currentPersonDto.LastName, currentPersonDto.PersonUniqueId);
+                                            }
+                                            else
+                                            {
+                                                _logger.LogError("Uncategorized person error | Error: {errorMessage}, PersonDto: {dto}", personResponse.ErrorMessage, JsonSerializer.Serialize(currentPersonDto));
+                                            }
 
-                                        NumNotUpserted++;
+                                            NumNotUpserted++;
+                                        }
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        _logger.LogError("People Exception: {ex}", ex);
+
                                     }
 
-                                    index++;
                                 }
+
+                                _logger.LogInformation("People upserted in a partially successful batch: {successBatch}", JsonSerializer.Serialize(successfulPeople));
                             }
                             else
                             {
-                                throw new Exception("Success message type not handled");
+                                throw new Exception("Person success message type not handled");
                             }
                         }
                         else
@@ -143,47 +151,13 @@ namespace ChromeRiverService.Classes
                     {
                         _logger.LogError("Error Thrown while processing people batch #{batchNum}: {ex}", batchNum, ex);
                     }
-                    break;
                 }
 
-                _logger.LogInformation("{log}",GetLog(Codes.ResultType.AllUpsertsComplete));
+                _logger.LogInformation("People Upsert Complete | Total People Upserted: {NumUpserted} | Total People Not Upserted: {NumNotUpserted}", NumUpserted, NumNotUpserted);
             }
             catch (Exception ex)
             {
                 _logger.LogError("People exception thrown after {NumUpserted} were upserted and {NumNotUpserted} were not sent or returned unsuccessful | Message: {messsage}", NumUpserted, NumNotUpserted, ex.Message);
-            }
-        }
-
-
-        private static string GetLog(Codes.ResultType resultType, PersonDto? personDto = null, Person? person = null, PersonResponse? personResponse = null)
-        {
-            string pipe = " | ";
-
-            StringBuilder log = new StringBuilder("Upsert Type: People")
-                             .Append(pipe).Append($"Result Type: {RegexHelper.PlaceSpacesBeforeUppercase(resultType.ToString())}");
-
-            if (resultType.Equals(Codes.ResultType.AllUpsertsComplete))
-            {
-                return   log.Append(pipe).Append($"Total People Upserted: {NumUpserted}")
-                            .Append(pipe).Append($"Total People Not Upserted: {NumNotUpserted}")
-                            .ToString();
-            }
-            else if (personDto is not null)
-            {
-                 log.Append(pipe).Append($"Name: {personDto.FirstName} {personDto.LastName}")
-                    .Append(pipe).Append($"Employee ID: {personDto.PersonUniqueId}");
-
-                if (personResponse is not null && !personResponse.ErrorMessage.Equals(string.Empty))
-                {
-                         log.Append(pipe).Append($"Error Message: {personResponse.ErrorMessage}")
-                            .Append(pipe).Append($"Dto: {JsonSerializer.Serialize(personDto)}");
-                }
-
-                return log.ToString();
-            }
-            else
-            {
-                throw new Exception("no person type found to create an error log");
             }
         }
     }

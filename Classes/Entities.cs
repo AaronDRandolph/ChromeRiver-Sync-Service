@@ -47,12 +47,12 @@ namespace ChromeRiverService.Classes {
                             }
                             catch (Exception ex)
                             {
-                                _logger.LogError("Error thrown while mapping entity '{entitiyName}': {log}", entity.EntityName, ex);
+                                _logger.LogError("Error thrown while mapping entity '{entitiyName}': {ex}", entity.EntityName, ex);
                                 NumNotUpserted++;
                             }
                         }
 
-                        HttpResponseMessage? response = await _httpHelper.ExecutePost<IEnumerable<EntityDto>>(upsertEntitiesEndpoint, entityDtos);
+                        HttpResponseMessage response = await _httpHelper.ExecutePost<IEnumerable<EntityDto>>(upsertEntitiesEndpoint, entityDtos) ?? ;
 
                         if (response is not null)
                         {
@@ -63,26 +63,32 @@ namespace ChromeRiverService.Classes {
                             else if (((int)response.StatusCode).Equals((int)Codes.HttpResponses.SomeUpsertedSuccessfully))
                             {
                                 JsonSerializerOptions options = new(JsonSerializerDefaults.Web);
-                                IEnumerable<EntityResponse>? entitiesResponses = JsonSerializer.Deserialize<IEnumerable<EntityResponse>>(response.Content.ReadAsStringAsync().Result, options) ?? throw new Exception("EntityResponse Json deserialize error");
-                                int index = 0;
+                                IEnumerable<EntityResponse> entitiesResponses = JsonSerializer.Deserialize<IEnumerable<EntityResponse>>(response.Content.ReadAsStringAsync().Result, options) ?? throw new Exception("EntityResponse Json deserialize error");
 
                                 foreach (EntityResponse entityResponse in entitiesResponses)
                                 {
-                                    if (entityResponse.Result.Equals("success", StringComparison.InvariantCultureIgnoreCase))
+                                    try
                                     {
-                                        NumUpserted++;
+                                        if (entityResponse.Result.Equals("success", StringComparison.InvariantCultureIgnoreCase))
+                                        {
+                                            NumUpserted++;
+                                        }
+                                        else
+                                        {
+                                            EntityDto currentEntity = entityDtos.FirstOrDefault(dtos => dtos.EntityCode == entityResponse.EntityCode) ?? throw new Exception($"Entity with EntityCode {entityResponse.EntityCode} could not be mapped to a dto for error messaging");
+                                            _logger.LogError("Error attempting to upsert an entity | Error: {errorMessage} | EntityDto: {dto}", entityResponse.ErrorMessage, JsonSerializer.Serialize(currentEntity));
+                                            NumNotUpserted++;
+                                        }
                                     }
-                                    else
+                                    catch (Exception ex)
                                     {
-                                        _logger.LogError("{log}", GetLog(Codes.ResultType.InvalidEntity.ToString(), entityResponse, entityDtos[index]));
-                                        NumNotUpserted++;
+                                        _logger.LogError("Entities Exception: {ex}", ex);
                                     }
-                                    index++;
                                 }
                             }
                             else
                             {
-                                throw new Exception("Success message type not handled");
+                                throw new Exception("Entity success message type not handled");
                             }
                         }
                         else
@@ -90,51 +96,18 @@ namespace ChromeRiverService.Classes {
                             _logger.LogError("The response for entity batch #{batchNum} returned a null", batchNum);
                             NumNotUpserted += entityDtos.Count;
                         }
-                        break;
-
                     }
                     catch (Exception ex) 
                     {
                         _logger.LogError("Exception thrown while processing entity batch #{batchNum}: {ex}", batchNum, ex);
                     }
-                    break;
-
                 }
 
-                _logger.LogInformation("{log}", GetLog(Codes.ResultType.AllUpsertsComplete.ToString()));
+                _logger.LogInformation("Entities Upsert Complete | Total Entities Upserted: {NumUpserted} | Total Allocations Not Upserted: {NumNotUpserted}", NumUpserted, NumNotUpserted);
             }
             catch (Exception ex)
             {
                 _logger.LogError("Entity exception thrown after {NumUpserted} were upserted and {NumNotUpserted} were not sent or returned unsuccessful | Message: {messsage}", NumUpserted, NumNotUpserted, ex.Message);
-            }
-        }
-
-
-
-        private static string GetLog(string resultType, EntityResponse? entityResponse = null, EntityDto? mappedDto = null)
-        {
-            string pipe = " | ";
-
-            StringBuilder log = new StringBuilder("Upsert Type: Entities")
-                             .Append(pipe).Append($"Result Type: {RegexHelper.PlaceSpacesBeforeUppercase(resultType)}");
-
-            if (resultType.Equals(Codes.ResultType.AllUpsertsComplete.ToString()))
-            {
-                return log
-                    .Append(pipe).Append($"Total Entities Upserted: {NumUpserted}")
-                    .Append(pipe).Append($"Total Entities Not Upserted: {NumNotUpserted}")
-                    .ToString();
-            }
-            else if (entityResponse is not null && mappedDto is not null)
-            {
-                return log
-                    .Append(pipe).Append($"Error: {entityResponse.ErrorMessage}")
-                    .Append(pipe).Append($"AllocationDto: ${JsonSerializer.Serialize(mappedDto)}")
-                    .ToString();
-            } 
-            else
-            {
-                throw new Exception("entityResponse and mappedDto required to create entity error log");
             }
         }
     }

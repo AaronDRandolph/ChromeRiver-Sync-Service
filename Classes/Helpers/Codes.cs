@@ -2,6 +2,7 @@ namespace ChromeRiverService.Classes.HelperClasses
 {
     public static class Codes {
 
+        // People code come from the IAM database, and are different than those onPrem. 
         public enum People
         {
             ITDepartment = 20,
@@ -12,17 +13,6 @@ namespace ChromeRiverService.Classes.HelperClasses
             RevokedEmployee = 7004,
             ActiveEmployee = 7005,
         }
-
-        public enum ResultType
-        {
-            OneUpserted,
-            AllUpsertsComplete,
-            UncategorizedError,
-            PotentiallyConflictsWithManuallyCreatedPerson,
-            InvalidEntity,
-            InvalidAllocation
-        }
-
         public enum HttpResponses
         {
             AllUpsertedSuccessfully = 200,
