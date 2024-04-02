@@ -40,9 +40,9 @@ namespace ChromeRiverService
             //Client Factory
             builder.Services.AddHttpClient("ChromeRiver", httpClient =>
             {
-                httpClient.BaseAddress = new Uri(builder.Configuration["CHROME_RIVER_BASE_URL_TEST"] ?? throw new Exception("Chrome River Base URL was null")); // this needs to be environment based
-                httpClient.DefaultRequestHeaders.TryAddWithoutValidation("x-api-key", builder.Configuration["CHROME_RIVER_API_KEY_TEST"]); // this needs to be environment based
-                httpClient.DefaultRequestHeaders.TryAddWithoutValidation("customer-code", builder.Configuration["CHROME_RIVER_API_CUSTOMER_CODE"]);
+                httpClient.BaseAddress = new Uri(builder.Configuration["CHROME_RIVER_BASE_URL_TEST"] ?? throw new Exception("CHROME_RIVER_BASE_URL_TEST was null")); // this needs to be environment based
+                httpClient.DefaultRequestHeaders.TryAddWithoutValidation("x-api-key", builder.Configuration["CHROME_RIVER_API_KEY_TEST"] ?? throw new Exception("CHROME_RIVER_API_KEY_TEST was null")); // this needs to be environment based
+                httpClient.DefaultRequestHeaders.TryAddWithoutValidation("customer-code", builder.Configuration["CHROME_RIVER_API_CUSTOMER_CODE"] ?? throw new Exception("CHROME_RIVER_API_CUSTOMER_CODE was null"));
             });
 
             //Automapper
