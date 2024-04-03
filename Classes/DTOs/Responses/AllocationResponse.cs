@@ -8,6 +8,6 @@ namespace ChromeRiverService.Classes
 {
     internal class AllocationResponse : Response
     {
-        public string? AllocationId { get; set; } // This returns null on success
+        public string AllocationId { get; set; } = ""; 
     }
 }

@@ -8,6 +8,6 @@ namespace ChromeRiverService.Classes
 {
     internal class PersonResponse : Response
     {
-        public string PersonUniqueId { get; set; } = "";   // return empty on Success
+        public string PersonUniqueId { get; set; } = ""; 
     }
 }

@@ -8,7 +8,7 @@ namespace ChromeRiverService.Classes
 {
     internal class EntityResponse : Response
     {
-        public string? EntityCode { get; set; }
-        public string? EntityTypeCode { get; set; }
+        public string EntityCode { get; set; } = "";
+        public string EntityTypeCode { get; set; } = "";
     }
 }
