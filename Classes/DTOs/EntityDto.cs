@@ -1,5 +1,4 @@
 using ChromeRiverService.Classes.DTOs.Subclasses;
-using ChromeRiverService.Db.NciCommon.DbViewsModels;
 
 namespace ChromeRiverService.Classes.DTOs
 { public class EntityDto

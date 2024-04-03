@@ -23,7 +23,6 @@ namespace ChromeRiverService.Classes.DTOs
         public string? VendorCode2 { get; set; }
         public bool? SuperDelegate { get; set; }
         public ICollection<PersonEntity>? PersonEntities { get; set; }
-
     }
 }
 

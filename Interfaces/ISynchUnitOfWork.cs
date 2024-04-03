@@ -1,5 +1,3 @@
-using ChromeRiverService.Classes;
-
 namespace ChromeRiverService.Interfaces
 {
     public interface ISynchUnitOfWork
