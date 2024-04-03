@@ -1,4 +1,3 @@
-using System.Text;
 using System.Text.Json;
 using AutoMapper;
 using ChromeRiverService.Classes.DTOs;
@@ -38,7 +37,7 @@ namespace ChromeRiverService.Classes
 
                     try
                     {
-                        IList<EntityDto> entityDtos = [];
+                        ICollection<EntityDto> entityDtos = [];
 
                         foreach (VwChromeRiverGetAllEntity entity in entityBatch)
                         {

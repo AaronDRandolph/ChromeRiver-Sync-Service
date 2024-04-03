@@ -1,7 +1,5 @@
-using System.Text;
 using System.Text.Json;
 using AutoMapper;
-using Azure;
 using ChromeRiverService.Classes.DTOs;
 using ChromeRiverService.Classes.DTOs.Responses;
 using ChromeRiverService.Classes.Helpers;
@@ -42,7 +40,7 @@ namespace ChromeRiverService.Classes
 
                     try
                     {
-                        IList<AllocationDto> allocationDtos = [];
+                        ICollection<AllocationDto> allocationDtos = [];
 
                         foreach (VwChromeRiverGetAllAllocation allocation in allocationBatch)
                         {

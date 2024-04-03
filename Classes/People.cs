@@ -8,12 +8,7 @@ using ChromeRiverService.Db.NciCommon.DbViewsModels;
 using ChromeRiverService.Interfaces;
 using IAMRepository.Models;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Diagnostics;
-using System.IO.Pipelines;
-using System.Net.Http.Json;
-using System.Text;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using Task = System.Threading.Tasks.Task;
 
 namespace ChromeRiverService.Classes
@@ -63,7 +58,7 @@ namespace ChromeRiverService.Classes
                 foreach (IEnumerable<Person> peopleBatch in peopleBatches)
                 {
                     batchNum++;
-                    IList<PersonDto> personDtos = [];
+                    ICollection<PersonDto> personDtos = [];
 
                     try
                     { 
