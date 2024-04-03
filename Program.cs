@@ -1,11 +1,10 @@
-using ChromeRiverService.Classes.HelperClasses;
 using ChromeRiverService.Db.Iam;
 using ChromeRiverService.Interfaces;
 using ChromeRiverService.UOW;
-using IamSyncService.Db.NciCommon;
 using Microsoft.EntityFrameworkCore;
 using NLog.Extensions.Logging;
-using AutoMapper;
+using ChromeRiverService.Classes.Helpers;
+using ChromeRiverService.Db.NciCommon;
 
 namespace ChromeRiverService
 {
