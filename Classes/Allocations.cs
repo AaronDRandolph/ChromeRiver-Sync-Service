@@ -66,7 +66,8 @@ namespace ChromeRiverService.Classes {
                             else if (((int)response.StatusCode).Equals((int)Codes.HttpResponses.SomeUpsertedSuccessfully))
                             {
                                 JsonSerializerOptions options = new(JsonSerializerDefaults.Web);
-                                IEnumerable<AllocationResponse> allocationResponses = JsonSerializer.Deserialize<IEnumerable<AllocationResponse>>(response.Content.ReadAsStringAsync().Result, options) ?? throw new Exception("AllocationResponse Json deserialize error");
+                                string responseContent = await response.Content.ReadAsStringAsync();
+                                IEnumerable<AllocationResponse> allocationResponses = JsonSerializer.Deserialize<IEnumerable<AllocationResponse>>(responseContent, options) ?? throw new Exception("AllocationResponse Json deserialize error");
 
                                 foreach (AllocationResponse allocationResponse in allocationResponses)
                                 {

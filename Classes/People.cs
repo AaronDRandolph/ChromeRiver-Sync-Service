@@ -97,7 +97,8 @@ namespace ChromeRiverService.Classes
                             else if (((int)response.StatusCode).Equals((int)Codes.HttpResponses.SomeUpsertedSuccessfully))
                             {
                                 JsonSerializerOptions options = new(JsonSerializerDefaults.Web);
-                                IEnumerable<PersonResponse> personResponses = JsonSerializer.Deserialize<IEnumerable<PersonResponse>>(response.Content.ReadAsStringAsync().Result, options) ?? throw new Exception("PersonResponse Json deserialize error");
+                                string responseContent = await response.Content.ReadAsStringAsync();
+                                IEnumerable<PersonResponse> personResponses = JsonSerializer.Deserialize<IEnumerable<PersonResponse>>(responseContent, options) ?? throw new Exception("PersonResponse Json deserialize error");
                                 ICollection<PersonDto> successfulPeople = [];
 
                                 foreach (PersonResponse personResponse in personResponses)
