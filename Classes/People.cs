@@ -76,7 +76,7 @@ namespace ChromeRiverService.Classes
                             }
                             catch (Exception ex)
                             {
-                                _logger.LogError(ex,$"Exception thrown while mapping personDto: {JsonSerializer.Serialize(personDto)}");
+                                _logger.LogError(ex,$"Exception thrown while mapping {person.FirstName} {person.LastName} with employeeID {person.EmployeeId} ");
                                 NumNotUpserted++;
                             }
                         }
