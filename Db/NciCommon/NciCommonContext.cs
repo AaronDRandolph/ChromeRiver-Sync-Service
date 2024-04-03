@@ -1,9 +1,9 @@
 using ChromeRiverService.Db.NciCommon.DbViewsModels;
 using Microsoft.EntityFrameworkCore;
 
-namespace ChromeRiverService;
+namespace ChromeRiverService.Db.NciCommon;
 
-public partial class NciCommonContext (DbContextOptions<NciCommonContext> options, IConfiguration configuration): DbContext(options)
+public partial class NciCommonContext(DbContextOptions<NciCommonContext> options, IConfiguration configuration) : DbContext(options)
 {
     private readonly IConfiguration _config = configuration;
 

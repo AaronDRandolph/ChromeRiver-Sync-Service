@@ -4,9 +4,9 @@ using System.Net.Http;
 using System.Text;
 using System.Text.Json;
 
-namespace ChromeRiverService.Classes.HelperClasses
+namespace ChromeRiverService.Classes.Helpers
 {
-    public class HttpHelper (ILogger<Worker> logger, IHttpClientFactory _httpClientFactory) : IHttpHelper
+    public class HttpHelper(ILogger<Worker> logger, IHttpClientFactory _httpClientFactory) : IHttpHelper
     {
         readonly ILogger<Worker> _logger = logger;
         readonly HttpClient _http = _httpClientFactory.CreateClient("ChromeRiver");
@@ -14,16 +14,16 @@ namespace ChromeRiverService.Classes.HelperClasses
 
         public async Task<HttpResponseMessage?> ExecutePost<T>(string endPoint, T dtoList) where T : class
         {
-            string jsonBody = JsonSerializer.Serialize(dtoList,options);
+            string jsonBody = JsonSerializer.Serialize(dtoList, options);
             StringBuilder errorLog = new();
 
             try
             {
                 string pipe = " | ";
                 StringContent content = new(jsonBody, Encoding.UTF8, "application/json");
-                HttpResponseMessage response =  await _http.PostAsync(endPoint, content);
+                HttpResponseMessage response = await _http.PostAsync(endPoint, content);
 
-                if (!response.IsSuccessStatusCode) 
+                if (!response.IsSuccessStatusCode)
                 {
                     errorLog.Append($"Exception: Unsuccessful post with status code '{response.StatusCode}'")
                             .Append(pipe).Append($"Payload : ${jsonBody}");
@@ -35,7 +35,7 @@ namespace ChromeRiverService.Classes.HelperClasses
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex,"Expection thrown while executing post");
+                _logger.LogError(ex, "Expection thrown while executing post");
                 return null;
             }
         }

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ChromeRiverService.Classes
+namespace ChromeRiverService.Classes.DTOs.Responses
 {
     internal class EntityResponse : Response
     {

@@ -2,12 +2,14 @@ using System.Text;
 using System.Text.Json;
 using AutoMapper;
 using ChromeRiverService.Classes.DTOs;
-using ChromeRiverService.Classes.HelperClasses;
+using ChromeRiverService.Classes.DTOs.Responses;
+using ChromeRiverService.Classes.Helpers;
+using ChromeRiverService.Db.NciCommon;
 using ChromeRiverService.Db.NciCommon.DbViewsModels;
 using ChromeRiverService.Interfaces;
-using IamSyncService.Db.NciCommon;
 
-namespace ChromeRiverService.Classes {
+namespace ChromeRiverService.Classes
+{
     public class Entities (INciCommonUnitOfWork nciCommonUnitOfWork, IConfiguration configuration, ILogger<Worker> logger, IHttpHelper httpHelper, IMapper mapper) : IEntities
     {
         private readonly IConfiguration _config = configuration;
@@ -52,7 +54,7 @@ namespace ChromeRiverService.Classes {
                             }
                         }
 
-                        HttpResponseMessage response = await _httpHelper.ExecutePost<IEnumerable<EntityDto>>(upsertEntitiesEndpoint, entityDtos) ?? ;
+                        HttpResponseMessage? response = await _httpHelper.ExecutePost<IEnumerable<EntityDto>>(upsertEntitiesEndpoint, entityDtos);
 
                         if (response is not null)
                         {

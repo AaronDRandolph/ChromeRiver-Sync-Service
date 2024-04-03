@@ -1,8 +1,8 @@
 using AutoMapper;
 using ChromeRiverService.Classes;
 using ChromeRiverService.Db.Iam;
+using ChromeRiverService.Db.NciCommon;
 using ChromeRiverService.Interfaces;
-using IamSyncService.Db.NciCommon;
 
 namespace ChromeRiverService.UOW
 {

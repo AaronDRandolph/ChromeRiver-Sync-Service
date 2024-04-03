@@ -5,13 +5,13 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
 
-namespace ChromeRiverService.Classes.HelperClasses
+namespace ChromeRiverService.Classes.Helpers
 {
     public class NullChecker
     {
         private static ICollection<string> nulls = [];
 
-         public static string GetNullPropertiesLog<T>(T obj, string uid) where T : class
+        public static string GetNullPropertiesLog<T>(T obj, string uid) where T : class
         {
             StringBuilder log = new($"Type: {typeof(T)} with uid {uid} not sent due to null attributes => ");
             AddNulls(obj);
@@ -21,7 +21,7 @@ namespace ChromeRiverService.Classes.HelperClasses
             return logString;
         }
 
-        private static void AddNulls(Object obj, string? parentAtribute = null)
+        private static void AddNulls(object obj, string? parentAtribute = null)
         {
             foreach (PropertyInfo prop in obj.GetType().GetProperties())
             {
@@ -29,7 +29,7 @@ namespace ChromeRiverService.Classes.HelperClasses
 
                 if (prop.GetValue(obj) is null)
                 {
-                    nulls.Add( parentAtribute is not null ? $"{parentAtribute} : {prop.Name}" : prop.Name);
+                    nulls.Add(parentAtribute is not null ? $"{parentAtribute} : {prop.Name}" : prop.Name);
                 }
 
                 // handle list of subclasses
@@ -38,9 +38,9 @@ namespace ChromeRiverService.Classes.HelperClasses
                     ICollection<EntityName>? entityNameObjs = (ICollection<EntityName>?)prop.GetValue(obj);
                     if (entityNameObjs is not null)
                     {
-                        foreach(EntityName entityNameObj in entityNameObjs)
+                        foreach (EntityName entityNameObj in entityNameObjs)
                         {
-                            AddNulls(entityNameObj,propName);
+                            AddNulls(entityNameObj, propName);
                         }
                     }
                 }
@@ -52,13 +52,13 @@ namespace ChromeRiverService.Classes.HelperClasses
                     {
                         foreach (PersonEntity personEntityObject in personEntityObjects)
                         {
-                            AddNulls(personEntityObject,propName);
+                            AddNulls(personEntityObject, propName);
                         }
                     }
                 }
             }
         }
-            
+
     }
 
 }

@@ -2,7 +2,7 @@ using System.Text.Json;
 using AutoMapper;
 using ChromeRiverService.Classes.DTOs;
 using ChromeRiverService.Classes.DTOs.Subclasses;
-using ChromeRiverService.Classes.HelperClasses;
+using ChromeRiverService.Classes.Helpers;
 using ChromeRiverService.Db.NciCommon.DbViewsModels;
 using IAMRepository.Models;
 

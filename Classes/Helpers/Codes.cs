@@ -1,6 +1,7 @@
-namespace ChromeRiverService.Classes.HelperClasses
+namespace ChromeRiverService.Classes.Helpers
 {
-    public static class Codes {
+    public static class Codes
+    {
 
         // People code come from the IAM database, and are different than those onPrem. 
         public enum People

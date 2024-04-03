@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace ChromeRiverService.Classes
+namespace ChromeRiverService.Classes.DTOs.Responses
 {
     public class Response
     {

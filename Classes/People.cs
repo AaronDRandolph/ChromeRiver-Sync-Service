@@ -1,11 +1,12 @@
 ﻿using AutoMapper;
 using ChromeRiverService.Classes.DTOs;
-using ChromeRiverService.Classes.HelperClasses;
+using ChromeRiverService.Classes.DTOs.Responses;
+using ChromeRiverService.Classes.Helpers;
 using ChromeRiverService.Db.Iam;
+using ChromeRiverService.Db.NciCommon;
 using ChromeRiverService.Db.NciCommon.DbViewsModels;
 using ChromeRiverService.Interfaces;
 using IAMRepository.Models;
-using IamSyncService.Db.NciCommon;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using System.IO.Pipelines;
@@ -151,6 +152,8 @@ namespace ChromeRiverService.Classes
                     {
                         _logger.LogError(ex, $"Exception thrown while processing people batch #{batchNum}");
                     }
+                    break;
+
                 }
 
                 _logger.LogInformation("People Upsert Complete | Total People Upserted: {NumUpserted} | Total People Not Upserted: {NumNotUpserted}", NumUpserted, NumNotUpserted);

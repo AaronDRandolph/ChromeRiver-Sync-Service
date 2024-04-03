@@ -3,14 +3,16 @@ using System.Text.Json;
 using AutoMapper;
 using Azure;
 using ChromeRiverService.Classes.DTOs;
-using ChromeRiverService.Classes.HelperClasses;
+using ChromeRiverService.Classes.DTOs.Responses;
+using ChromeRiverService.Classes.Helpers;
+using ChromeRiverService.Db.NciCommon;
 using ChromeRiverService.Db.NciCommon.DbViewsModels;
 using ChromeRiverService.Interfaces;
-using IamSyncService.Db.NciCommon;
 using Task = System.Threading.Tasks.Task;
 
 
-namespace ChromeRiverService.Classes {
+namespace ChromeRiverService.Classes
+{
     public class Allocations (INciCommonUnitOfWork nciCommonUnitOfWork, IConfiguration configuration, ILogger<Worker> logger, IHttpHelper httpHelper, IMapper mapper) : IAllocations
     {
         private readonly IConfiguration _config = configuration;
@@ -105,6 +107,7 @@ namespace ChromeRiverService.Classes {
                     {
                         _logger.LogError(ex, $"Exception thrown while processing allocation batch #{batchNum}");
                     }
+                    break;
                 }
 
                 _logger.LogInformation("Allocations Upsert Complete | Total Allocations Upserted: {NumUpserted} | Total Allocations Not Upserted: {NumNotUpserted}", NumUpserted, NumNotUpserted);

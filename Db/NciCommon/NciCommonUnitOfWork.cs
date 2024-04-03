@@ -1,9 +1,7 @@
-
 using ChromeRiverService.Db.NciCommon.Interfaces;
 using ChromeRiverService.Db.NciCommon.Repositories;
-using IamSyncService.Db.NciCommon;
 
-namespace ChromeRiverService 
+namespace ChromeRiverService.Db.NciCommon
 {
     public class NciCommonUnitOfWork : INciCommonUnitOfWork
     {
@@ -26,7 +24,7 @@ namespace ChromeRiverService
                 _entities ??= new VwChromeRiverGetAllEntityRepository(_context);
                 return _entities;
             }
-        } 
+        }
 
         public IVwChromeRiverGetVendorInfoRepository Vendors
         {
@@ -35,7 +33,7 @@ namespace ChromeRiverService
                 _vendors ??= new VwChromeRiverGetVendorInfoRepository(_context);
                 return _vendors;
             }
-        } 
+        }
 
         public IVwChromeRiverGetAllAllocationRepository Allocations
         {
@@ -44,7 +42,7 @@ namespace ChromeRiverService
                 _allocations ??= new VwChromeRiverGetAllAllocationRepository(_context);
                 return _allocations;
             }
-        } 
+        }
 
         public IVwGetChromeRiverRolesRepository Roles
         {
@@ -53,7 +51,7 @@ namespace ChromeRiverService
                 _roles ??= new VwGetChromeRiverRolesRepository(_context);
                 return _roles;
             }
-        } 
+        }
     }
 
 

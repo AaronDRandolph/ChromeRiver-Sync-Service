@@ -1,6 +1,6 @@
 using ChromeRiverService.Db.NciCommon.Interfaces;
 
-namespace IamSyncService.Db.NciCommon
+namespace ChromeRiverService.Db.NciCommon
 {
     public interface INciCommonUnitOfWork
     {
