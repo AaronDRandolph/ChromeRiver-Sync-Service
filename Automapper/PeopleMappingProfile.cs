@@ -62,7 +62,7 @@ namespace ChromeRiverService.Automapper
 
         private static string? GetPrimaryEmailAddress (Person person) 
         {
-            return  person.ContactPeople?.FirstOrDefault()?.ContactValue;
+            return  $"{GetUserName(person)}@bakerripley.org" ?? string.Empty;
         }
 
 

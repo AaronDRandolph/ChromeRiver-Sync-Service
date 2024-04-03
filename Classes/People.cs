@@ -53,7 +53,6 @@ namespace ChromeRiverService.Classes
                                 .Include(p => p.ManagerPeople.Where(mp => mp.EndDt == null)).ThenInclude(mp => mp.ManagerPerson)
                                 .Include(p => p.JobTitles.Where(jt => jt.EndDt == null))
                                 .Include(p => p.DomainEntityPeople.Where(dp => dp.Active))
-                                .Include(p => p.ContactPeople.Where(cp => cp.ContactTypeId == (int)Codes.People.WorkEmail))
                 );
 
                 IEnumerable<IEnumerable<Person>> peopleBatches = people.Chunk(batchSize);
