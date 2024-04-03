@@ -11,7 +11,7 @@ namespace ChromeRiverService.Automapper
     public class PersonMappingProfile : Profile
     {
 
-        readonly Dictionary<string, string> divisionMapper = JsonSerializer.Deserialize<Dictionary<string, string>>(File.ReadAllText(".\\Automapper\\JSON\\DivisionMappings.json")) ?? throw new Exception("Division mapper json file could not be found or deserialized");
+        readonly Dictionary<string, string> divisionMapper = JsonSerializer.Deserialize<Dictionary<string, string>>(File.ReadAllText(".\\Automapper\\JSON\\DivisionMappings.json")) ?? throw new Exception("Division mapper json file could not be found or could not be deserialized");
         public PersonMappingProfile()
         {
             //Configure the Mappings
