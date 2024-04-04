@@ -60,9 +60,9 @@ namespace ChromeRiverService.Automapper
         private static string GetPrimaryEmailAddress(Person person) => $"{GetUserName(person)}@bakerripley.org";
 
         private static Person GetManager(Person person) => person.ManagerPeople?.FirstOrDefault()?.ManagerPerson ?? throw new ArgumentNullException("Manager object cannot be null");
-        private static string GetUserName (Person person) => person.DomainEntityPeople?.FirstOrDefault()?.EntityName ?? throw new ArgumentNullException("Domain entity name cannot be null");
+        private static string GetUserName(Person person) => person.DomainEntityPeople?.FirstOrDefault()?.EntityName ?? throw new ArgumentNullException("Domain entity name cannot be null");
 
-        private static bool GetIsIT (Person person) => GetDepartment(person).DepartmentId.Equals(Codes.People.ITDepartment);
+        private static bool GetIsIT (Person person) => GetDepartment(person).DepartmentId.Equals((int)Codes.People.ITDepartment);
 
         private static string GetJobTitle (Person person) => person.JobTitles.Where(jt => jt.EndDt == null)?.FirstOrDefault()?.Title ?? throw new ArgumentNullException(nameof(person.JobTitles));
 
