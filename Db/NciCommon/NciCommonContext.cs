@@ -1,22 +1,24 @@
+﻿using System;
+using System.Collections.Generic;
 using ChromeRiverService.Db.NciCommon.DbViewsModels;
 using Microsoft.EntityFrameworkCore;
 
 namespace ChromeRiverService.Db.NciCommon;
 
 public partial class NciCommonContext(DbContextOptions<NciCommonContext> options, IConfiguration configuration) : DbContext(options)
+
 {
     private readonly IConfiguration _config = configuration;
-
     public virtual DbSet<VwChromeRiverGetAllAllocation> VwChromeRiverGetAllAllocations { get; set; }
 
     public virtual DbSet<VwChromeRiverGetAllEntity> VwChromeRiverGetAllEntities { get; set; }
 
     public virtual DbSet<VwChromeRiverGetVendorInfo> VwChromeRiverGetVendorInfos { get; set; }
 
-    public virtual DbSet<VwGetChromeRiverRoles> VwGetChromeRiverRoles { get; set; }
+    public virtual DbSet<VwGetChromeRiverRole> VwGetChromeRiverRole { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        => optionsBuilder.UseSqlServer(_config.GetValue<string>("NCI_LOCAL_CONNECTION_STRING"));
+ => optionsBuilder.UseSqlServer(_config.GetValue<string>("NCI_LOCAL_CONNECTION_STRING"));
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -99,7 +101,7 @@ public partial class NciCommonContext(DbContextOptions<NciCommonContext> options
                 .IsUnicode(false);
         });
 
-        modelBuilder.Entity<VwGetChromeRiverRoles>(entity =>
+        modelBuilder.Entity<VwGetChromeRiverRole>(entity =>
         {
             entity
                 .HasNoKey()

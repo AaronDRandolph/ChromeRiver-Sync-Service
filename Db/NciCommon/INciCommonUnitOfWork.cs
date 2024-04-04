@@ -7,6 +7,6 @@ namespace ChromeRiverService.Db.NciCommon
         IVwChromeRiverGetAllEntityRepository Entities { get; }
         IVwChromeRiverGetVendorInfoRepository Vendors { get; }
         IVwChromeRiverGetAllAllocationRepository Allocations { get; }
-        IVwGetChromeRiverRolesRepository Roles { get; }
+        IVwGetChromeRiverRoleRepository Roles { get; }
     }
 }

@@ -1,9 +1,11 @@
-namespace ChromeRiverService.Db.NciCommon.DbViewsModels
-{
-    public partial class VwGetChromeRiverRoles
-    {
-        public string EmployeeId { get; set; } = null!;
+﻿using System;
+using System.Collections.Generic;
 
-        public string ApRole { get; set; } = null!;
-    }
+namespace ChromeRiverService.Db.NciCommon.DbViewsModels;
+
+public partial class VwGetChromeRiverRole
+{
+    public string EmployeeId { get; set; } = null!;
+
+    public string ApRole { get; set; } = null!;
 }

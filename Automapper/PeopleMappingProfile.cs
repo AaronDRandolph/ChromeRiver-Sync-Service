@@ -44,7 +44,7 @@ namespace ChromeRiverService.Automapper
                 .AfterMap((src, dest) => dest.VendorCode2 = GetPersonVendorInfo(src, dest)?.VendorCode2 ?? "");
 
             // Only custom mapping, nothing automatic
-            CreateMap<IEnumerable<VwGetChromeRiverRoles>, PersonDto>(MemberList.None)
+            CreateMap<IEnumerable<VwGetChromeRiverRole>, PersonDto>(MemberList.None)
                 .AfterMap((src, dest) => {
                     PersonEntity? personRoleEntity = GetFirmWideRoleEntity(src, dest);
                     if (personRoleEntity is not null)
@@ -87,7 +87,7 @@ namespace ChromeRiverService.Automapper
             ];
         }
 
-        private static PersonEntity? GetFirmWideRoleEntity( IEnumerable<VwGetChromeRiverRoles> firmWideRoles, PersonDto personDto)
+        private static PersonEntity? GetFirmWideRoleEntity( IEnumerable<VwGetChromeRiverRole> firmWideRoles, PersonDto personDto)
         {
             return  firmWideRoles.FirstOrDefault(role => role.EmployeeId == personDto.PersonUniqueId) is not null ?
                 new PersonEntity () {RoleName = firmWideRoles.FirstOrDefault(role => role.EmployeeId == personDto.PersonUniqueId)?.ApRole, EntityTypeCode = "Firmwide",EntityCode = "Firmwide"} : null;

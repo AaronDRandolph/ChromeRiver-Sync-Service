@@ -15,7 +15,7 @@ namespace ChromeRiverService.Db.NciCommon
         private IVwChromeRiverGetAllEntityRepository? _entities;
         private IVwChromeRiverGetVendorInfoRepository? _vendors;
         private IVwChromeRiverGetAllAllocationRepository? _allocations;
-        private IVwGetChromeRiverRolesRepository? _roles;
+        private IVwGetChromeRiverRoleRepository? _roles;
 
         public IVwChromeRiverGetAllEntityRepository Entities
         {
@@ -44,11 +44,11 @@ namespace ChromeRiverService.Db.NciCommon
             }
         }
 
-        public IVwGetChromeRiverRolesRepository Roles
+        public IVwGetChromeRiverRoleRepository Roles
         {
             get
             {
-                _roles ??= new VwGetChromeRiverRolesRepository(_context);
+                _roles ??= new VwGetChromeRiverRoleRepository(_context);
                 return _roles;
             }
         }
