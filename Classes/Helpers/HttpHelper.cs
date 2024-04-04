@@ -10,30 +10,26 @@ namespace ChromeRiverService.Classes.Helpers
         readonly HttpClient _http = _httpClientFactory.CreateClient("ChromeRiver");
         JsonSerializerOptions options = new(JsonSerializerDefaults.Web);
 
-        public async Task<HttpResponseMessage?> ExecutePost<T>(string endPoint, T dtoList) where T : class
+        public async Task<HttpResponseMessage?> ExecutePostOrPatch<T>(string endPoint, T data, bool isPatch) where T : class
         {
-            string jsonBody = JsonSerializer.Serialize(dtoList, options);
-            StringBuilder errorLog = new();
+            string jsonBody = JsonSerializer.Serialize(data, options);
 
             try
             {
-                string pipe = " | ";
                 StringContent content = new(jsonBody, Encoding.UTF8, "application/json");
-                HttpResponseMessage response = await _http.PostAsync(endPoint, content);
+                HttpResponseMessage response =  isPatch ? await _http.PatchAsync(endPoint, content) : await _http.PostAsync(endPoint, content);
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    errorLog.Append($"Exception: Unsuccessful post with status code '{response.StatusCode}'")
-                            .Append(pipe).Append($"Payload : ${jsonBody}");
-
-                    throw new Exception(errorLog.ToString());
+                    string responseMessage = await response.Content.ReadAsStringAsync();
+                    _logger.LogError("Unsuccessful post with status code '{statusCode}' | Message: {message} | Payload : {jsonBody}",response.StatusCode, responseMessage, jsonBody);
                 }
 
                 return response;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Expection thrown while executing post");
+                _logger.LogError(ex,"Expection thrown while executing batch post for {class} with payload : {payload}", data.GetType().Name, jsonBody);
                 return null;
             }
         }

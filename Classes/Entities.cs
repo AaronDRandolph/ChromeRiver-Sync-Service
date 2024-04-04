@@ -53,7 +53,7 @@ namespace ChromeRiverService.Classes
                             }
                         }
 
-                        HttpResponseMessage? response = await _httpHelper.ExecutePost<IEnumerable<EntityDto>>(upsertEntitiesEndpoint, entityDtos);
+                        HttpResponseMessage? response = await _httpHelper.ExecutePostOrPatch<IEnumerable<EntityDto>>(upsertEntitiesEndpoint, entityDtos, isPatch: false);
 
                         if (response is not null)
                         {

@@ -55,7 +55,7 @@ namespace ChromeRiverService.Classes
                                 NumNotUpserted++;
                             }
                         }
-                        HttpResponseMessage? response = await _httpHelper.ExecutePost<IEnumerable<AllocationDto>>(upsertAllocationsEndpoint, allocationDtos);
+                        HttpResponseMessage? response = await _httpHelper.ExecutePostOrPatch<IEnumerable<AllocationDto>>(upsertAllocationsEndpoint, allocationDtos, isPatch: false);
 
                         if (response is not null)
                         {

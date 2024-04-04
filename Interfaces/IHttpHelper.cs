@@ -2,6 +2,6 @@
 {
     public interface IHttpHelper
     {
-        Task<HttpResponseMessage?> ExecutePost<T>(string endPoint, T dtoList) where T : class;
+        Task<HttpResponseMessage?> ExecutePostOrPatch<T>(string endPoint, T data, bool isPatch) where T : class;
     }
 }

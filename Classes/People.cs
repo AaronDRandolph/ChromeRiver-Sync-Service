@@ -24,14 +24,16 @@ namespace ChromeRiverService.Classes
 
         private static int NumUpserted = 0;
         private static int NumNotUpserted = 0;
+        private static int NumSetToDisabled = 0;
+        private static int DeactivationWindowLength = 30;
 
 
         public async Task Upsert()
         {
             try
             {   
-                int deactivationWidowLength = 7;
                 string upsertPeopleEndPoint = _config.GetValue<string>("UPSERT_PEOPLE_ENDPOINT") ?? throw new Exception("UPSERT_PEOPLE_ENDPOINT is null");
+                string patchPeopleEndPoint = _config.GetValue<string>("PATCH_PERSON_ENDPOINT") ?? throw new Exception("PATCH_PEOPLE_ENDPOINT is null");
                 int batchSize = _config.GetValue<int>("UPSERT_PEOPLE_ENDPOINT_BATCH_LIMIT");
                 int batchNum = 0;
 
@@ -42,7 +44,7 @@ namespace ChromeRiverService.Classes
                                     p.CodeIdemploymentStatus == (int)Codes.People.OnLeaveEmployee ||
                                     p.CodeIdemploymentStatus == (int)Codes.People.SupspendedEmployee ||
                                     p.CodeIdemploymentStatus == (int)Codes.People.RevokedEmployee ||
-                                    (p.CodeIdemploymentStatus == (int)Codes.People.TerminatedEmployee && p.EndDate > DateTime.Now.AddDays(-deactivationWidowLength))
+                                    (p.CodeIdemploymentStatus == (int)Codes.People.TerminatedEmployee && p.EndDate > DateTime.Now.AddDays(-DeactivationWindowLength))
                                 ),
                 include: source => source
                                 .Include(p => p.PersonPrograms.Where(pp => pp.EndDt == null)).ThenInclude(pp => pp.Program).ThenInclude(p => p.Department)
@@ -64,24 +66,34 @@ namespace ChromeRiverService.Classes
                     { 
                         foreach (Person person in peopleBatch)
                         {
-                            PersonDto? personDto = new();
-
-                            try
+                            if (person.EndDate is not null)
                             {
-                                personDto = _mapper.Map<Person, PersonDto>(person);
-                                _mapper.Map(vendorInfo, personDto);
-                                _mapper.Map(companyWideRoles, personDto);
-
-                                personDtos.Add(personDto);
+                                await _httpHelper.ExecutePostOrPatch($"{patchPeopleEndPoint}/{person.EmployeeId}", new { Status = "DELETED" } , isPatch: true);
+                                _logger.LogInformation("{FirstName} {LastName} with employeeID {EmployeeId} status was set to disabled", person.FirstName, person.LastName, person.EmployeeId);
+                                NumSetToDisabled++;
                             }
-                            catch (Exception ex)
+                            else
                             {
-                                _logger.LogError(ex,$"Exception thrown while mapping {person.FirstName} {person.LastName} with employeeID {person.EmployeeId} ");
-                                NumNotUpserted++;
+                                PersonDto? personDto = new();
+
+                                try
+                                {
+                                    personDto = _mapper.Map<Person, PersonDto>(person);
+                                    _mapper.Map(vendorInfo, personDto);
+                                    _mapper.Map(companyWideRoles, personDto);
+
+                                    personDtos.Add(personDto);
+                                }
+                                catch (Exception ex)
+                                {
+                                    _logger.LogError(ex, "Exception thrown while mapping {FirstName} {LastName} with employeeID {EmployeeId}",person.FirstName,person.LastName,person.EmployeeId);
+                                    NumNotUpserted++;
+                                }
                             }
+
                         }
 
-                        HttpResponseMessage? response = await _httpHelper.ExecutePost<IEnumerable<PersonDto>>(upsertPeopleEndPoint, personDtos);
+                        HttpResponseMessage? response = await _httpHelper.ExecutePostOrPatch<IEnumerable<PersonDto>>(upsertPeopleEndPoint, personDtos, isPatch: false);
 
                         if (response is not null)
                         {
@@ -125,7 +137,6 @@ namespace ChromeRiverService.Classes
                                     catch (Exception ex)
                                     {
                                         _logger.LogError(ex , "Expection processing person upsert responses");
-
                                     }
 
                                 }
@@ -145,17 +156,15 @@ namespace ChromeRiverService.Classes
                     }
                     catch (Exception ex)    
                     {
-                        _logger.LogError(ex, $"Exception thrown while processing people batch #{batchNum}");
+                        _logger.LogError(ex,"Exception thrown while processing people batch #{batchNum}", batchNum);
                     }
-                    break;
-
                 }
 
-                _logger.LogInformation("People Upsert Complete | Total People Upserted: {NumUpserted} | Total People Not Upserted: {NumNotUpserted}", NumUpserted, NumNotUpserted);
+                _logger.LogInformation("People Upsert Complete | Total People Upserted: {NumUpserted} | Total People Not Upserted: {NumNotUpserted} | {NumSetToDisabled} were set to disabled due to termination in the last {deactivationWidowLength} days", NumUpserted, NumNotUpserted, NumSetToDisabled, DeactivationWindowLength);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex,$"People exception thrown after {NumUpserted} were upserted and {NumNotUpserted} were not sent or returned unsuccessful");
+                _logger.LogError(ex,"People exception thrown after {NumUpserted} were upserted | {NumNotUpserted} were not sent or returned unsuccessful | {NumSetToDisabled} were set to disabled due to termination in the last {deactivationWidowLength} days", NumUpserted, NumNotUpserted, NumSetToDisabled, DeactivationWindowLength);
             }
         }
     }
