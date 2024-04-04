@@ -25,7 +25,7 @@ namespace ChromeRiverService.Classes
         private static int NumUpserted = 0;
         private static int NumNotUpserted = 0;
         private static int NumSetToDisabled = 0;
-        private static int DeactivationWindowLength = 30;
+        private static int DeactivationWindowLength = 10;
 
 
         public async Task Upsert()
