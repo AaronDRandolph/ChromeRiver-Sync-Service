@@ -14,9 +14,7 @@ namespace ChromeRiverService.Automapper
             CreateMap<VwChromeRiverGetAllAllocation, AllocationDto>()
                 .AddTransform<string>((str) => str.Trim())
                 .ForMember(dest => dest.Currency, opt => opt.MapFrom(src => "USD"))
-                .ForMember(dest => dest.Locale, opt => opt.MapFrom(src => "en"))
-                .AfterMap((src, dst) => dst.AllocationNumber = src.AllocationNumber.Equals("280-11-6399") ? null : src.AllocationNumber);
-
+                .ForMember(dest => dest.Locale, opt => opt.MapFrom(src => "en"));
         }
     }
 }
