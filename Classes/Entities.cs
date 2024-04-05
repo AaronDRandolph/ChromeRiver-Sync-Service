@@ -29,7 +29,7 @@ namespace ChromeRiverService.Classes
                 int batchNum = 0;
 
                 IEnumerable<VwChromeRiverGetAllEntity> entities = await _nciCommonUnitOfWork.Entities.GetAll();
-                IEnumerable<IEnumerable<VwChromeRiverGetAllEntity>> entityBatches = entities.Chunk<VwChromeRiverGetAllEntity>(batchSize.Equals(0) ? throw new Exception("Allocation batch size cannot be 0") : batchSize);
+                IEnumerable<IEnumerable<VwChromeRiverGetAllEntity>> entityBatches = entities.Chunk<VwChromeRiverGetAllEntity>(batchSize.Equals(0) ? throw new Exception("Entities batch size cannot be 0") : batchSize);
 
                 foreach (IEnumerable<VwChromeRiverGetAllEntity> entityBatch in entityBatches)
                 {
@@ -105,7 +105,7 @@ namespace ChromeRiverService.Classes
                     }
                 }
 
-                _logger.LogInformation("Entities Upsert Complete | Total Entities Upserted: {NumUpserted} | Total Allocations Not Upserted: {NumNotUpserted}", NumUpserted, NumNotUpserted);
+                _logger.LogInformation("Entities Upsert Complete | Total Entities Upserted: {NumUpserted} | Total Entities Not Upserted: {NumNotUpserted}", NumUpserted, NumNotUpserted);
             }
             catch (Exception ex)
             {
