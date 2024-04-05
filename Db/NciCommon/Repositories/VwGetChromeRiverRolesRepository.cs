@@ -4,7 +4,7 @@ using IAMRepository.Repository;
 
 namespace ChromeRiverService.Db.NciCommon.Repositories
 {
-    public class VwGetChromeRiverRolesRepository (NciCommonContext context ) : GenericRepository<VwGetChromeRiverRoles>(context), IVwGetChromeRiverRolesRepository
+    public class VwGetChromeRiverRoleRepository (NciCommonContext context ) : GenericRepository<VwGetChromeRiverRole>(context), IVwGetChromeRiverRoleRepository
     {
     }
 }

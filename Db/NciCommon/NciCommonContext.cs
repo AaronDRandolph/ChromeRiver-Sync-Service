@@ -1,7 +1,10 @@
+﻿using System;
+using System.Collections.Generic;
 using ChromeRiverService.Db.NciCommon.DbViewsModels;
 using Microsoft.EntityFrameworkCore;
 
 namespace ChromeRiverService.Db.NciCommon;
+
 
 public partial class NciCommonContext(DbContextOptions<NciCommonContext> options, IConfiguration configuration) : DbContext(options)
 {
@@ -13,10 +16,10 @@ public partial class NciCommonContext(DbContextOptions<NciCommonContext> options
 
     public virtual DbSet<VwChromeRiverGetVendorInfo> VwChromeRiverGetVendorInfos { get; set; }
 
-    public virtual DbSet<VwGetChromeRiverRoles> VwGetChromeRiverRoles { get; set; }
+    public virtual DbSet<VwGetChromeRiverRole> VwGetChromeRiverRoles { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        => optionsBuilder.UseSqlServer(_config.GetValue<string>("NCI_LOCAL_CONNECTION_STRING"));
+           => optionsBuilder.UseSqlServer(_config.GetValue<string>("NCI_LOCAL_CONNECTION_STRING"));
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -38,6 +41,7 @@ public partial class NciCommonContext(DbContextOptions<NciCommonContext> options
             entity.Property(e => e.ClientNumber)
                 .HasMaxLength(3)
                 .IsUnicode(false);
+            entity.Property(e => e.CloseDate).HasMaxLength(30);
             entity.Property(e => e.Currency)
                 .HasMaxLength(3)
                 .IsUnicode(false);
@@ -99,7 +103,7 @@ public partial class NciCommonContext(DbContextOptions<NciCommonContext> options
                 .IsUnicode(false);
         });
 
-        modelBuilder.Entity<VwGetChromeRiverRoles>(entity =>
+        modelBuilder.Entity<VwGetChromeRiverRole>(entity =>
         {
             entity
                 .HasNoKey()
