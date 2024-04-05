@@ -51,7 +51,7 @@ namespace ChromeRiverService.Classes
                             }
                             catch (Exception ex)
                             {
-                                _logger.LogError(ex, $"Exception thrown while mapping Allocation Number '{allocation.AllocationNumber}'");
+                                _logger.LogError(ex,"Exception thrown while mapping Allocation Number '{allocationNumber}'",allocation.AllocationNumber);
                                 NumNotUpserted++;
                             }
                         }
@@ -106,7 +106,7 @@ namespace ChromeRiverService.Classes
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogError(ex, $"Exception thrown while processing allocation batch #{batchNum}");
+                        _logger.LogError(ex, "Exception thrown while processing allocation batch #{batchNum}",batchNum);
                     }
                 }
 
@@ -114,7 +114,7 @@ namespace ChromeRiverService.Classes
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex,$"Allocations exception thrown after {NumUpserted} were upserted and {NumNotUpserted} were not sent or returned unsuccessful");
+                _logger.LogError(ex,"Allocations exception thrown after {NumUpserted} were upserted and {NumNotUpserted} were not sent or returned unsuccessful",NumUpserted,NumNotUpserted);
             }
         }
     }
