@@ -56,8 +56,11 @@ namespace ChromeRiverService.Classes
                             }
                         }
 
-                        if (allocationDtos.Count == 0) throw new Exception($"Allocation batch #{batchNum} mapping completely failed");
-
+                        if (allocationDtos.Count == 0) 
+                        {
+                            throw new Exception($"Allocation batch #{batchNum} mapping completely failed");
+                        }
+                        
                         HttpResponseMessage? response = await _httpHelper.ExecutePostOrPatch<IEnumerable<AllocationDto>>(upsertAllocationsEndpoint, allocationDtos, isPatch: false);
 
                         if (response is not null)
