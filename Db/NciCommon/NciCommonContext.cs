@@ -102,7 +102,6 @@ public partial class NciCommonContext(DbContextOptions<NciCommonContext> options
         });
 
         modelBuilder.Entity<VwGetChromeRiverRole>(entity =>
-        modelBuilder.Entity<VwGetChromeRiverRole>(entity =>
         {
             entity
                 .HasNoKey()
