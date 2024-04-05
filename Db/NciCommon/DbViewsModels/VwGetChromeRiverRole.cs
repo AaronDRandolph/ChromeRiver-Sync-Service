@@ -1,4 +1,4 @@
-﻿namespace ChromeRiverService.Db.NciCommon.DbViewsModels;
+namespace ChromeRiverService.Db.NciCommon.DbViewsModels;
 
 public partial class VwGetChromeRiverRole
 {
@@ -6,3 +6,4 @@ public partial class VwGetChromeRiverRole
 
     public string ApRole { get; set; } = null!;
 }
+

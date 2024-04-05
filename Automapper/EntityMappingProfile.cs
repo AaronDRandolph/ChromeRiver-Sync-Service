@@ -14,7 +14,11 @@ namespace ChromeRiverService.Automapper
             //Source: VwChromeRiverGetAllEntity and Destination: EntityDto
             CreateMap<VwChromeRiverGetAllEntity, EntityDto>()
             .AddTransform<string>((str) => str.Trim())
-            .AfterMap((src,dest) => dest.EntityNames = [new EntityName() { Name = src.EntityName, Locale = "en" }]);
+            .AfterMap((src, dest) =>
+            {
+                dest.EntityNames = [new EntityName() { Name = src.EntityName, Locale = "en" }];
+                dest.Status = src.Active == 1 ? "ACT" : "DEL";
+            });
 
         }
     }

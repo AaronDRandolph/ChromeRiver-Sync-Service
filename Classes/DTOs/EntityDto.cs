@@ -8,5 +8,7 @@ namespace ChromeRiverService.Classes.DTOs
         public string? EntityTypeCode { get; set; }
         public string? ExtraData1 { get; set; }
         public IEnumerable<EntityName>? EntityNames { get; set; }
+        public string? Status { get; set; }
+
     }
 }
