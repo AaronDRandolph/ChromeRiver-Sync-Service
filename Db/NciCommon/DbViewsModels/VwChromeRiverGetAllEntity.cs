@@ -1,4 +1,4 @@
-namespace ChromeRiverService.Db.NciCommon.DbViewsModels
+﻿namespace ChromeRiverService.Db.NciCommon.DbViewsModels
 {
     public class VwChromeRiverGetAllEntity
     {
