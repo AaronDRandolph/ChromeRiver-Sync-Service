@@ -53,6 +53,9 @@ namespace ChromeRiverService.Classes
                             }
                         }
 
+                        if (entityDtos.Count == 0) throw new Exception($"Entity batch #{batchNum} mapping completely failed");
+
+
                         HttpResponseMessage? response = await _httpHelper.ExecutePostOrPatch<IEnumerable<EntityDto>>(upsertEntitiesEndpoint, entityDtos, isPatch: false);
 
                         if (response is not null)

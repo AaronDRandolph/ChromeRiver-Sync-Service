@@ -93,6 +93,8 @@ namespace ChromeRiverService.Classes
 
                         }
 
+                        if (personDtos.Count == 0) throw new Exception($"Person batch #{batchNum} mapping completely failed");
+
                         HttpResponseMessage? response = await _httpHelper.ExecutePostOrPatch<IEnumerable<PersonDto>>(upsertPeopleEndPoint, personDtos, isPatch: false);
 
                         if (response is not null)

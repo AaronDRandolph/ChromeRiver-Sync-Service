@@ -47,7 +47,7 @@ namespace ChromeRiverService.Classes
                             try
                             {
                                 AllocationDto allocationDto = _mapper.Map<VwChromeRiverGetAllAllocation, AllocationDto>(allocation);
-                                allocationDtos.Add(allocationDto);
+                                //allocationDtos.Add(allocationDto);
                             }
                             catch (Exception ex)
                             {
@@ -55,6 +55,9 @@ namespace ChromeRiverService.Classes
                                 NumNotUpserted++;
                             }
                         }
+
+                        if (allocationDtos.Count == 0) throw new Exception($"Allocation batch #{batchNum} mapping completely failed");
+
                         HttpResponseMessage? response = await _httpHelper.ExecutePostOrPatch<IEnumerable<AllocationDto>>(upsertAllocationsEndpoint, allocationDtos, isPatch: false);
 
                         if (response is not null)
