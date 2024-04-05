@@ -47,7 +47,7 @@ namespace ChromeRiverService.Classes
                             try
                             {
                                 AllocationDto allocationDto = _mapper.Map<VwChromeRiverGetAllAllocation, AllocationDto>(allocation);
-                                //allocationDtos.Add(allocationDto);
+                                allocationDtos.Add(allocationDto);
                             }
                             catch (Exception ex)
                             {
@@ -108,7 +108,6 @@ namespace ChromeRiverService.Classes
                     {
                         _logger.LogError(ex, $"Exception thrown while processing allocation batch #{batchNum}");
                     }
-                    break;
                 }
 
                 _logger.LogInformation("Allocations Upsert Complete | Total Allocations Upserted: {NumUpserted} | Total Allocations Not Upserted: {NumNotUpserted}", NumUpserted, NumNotUpserted);
