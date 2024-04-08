@@ -74,11 +74,9 @@ namespace ChromeRiverService.Classes
                             }
                             else
                             {
-                                PersonDto? personDto = new();
-
                                 try
                                 {
-                                    personDto = _mapper.Map<Person, PersonDto>(person);
+                                    PersonDto personDto = _mapper.Map<Person, PersonDto>(person);
                                     _mapper.Map(vendorInfo, personDto);
                                     _mapper.Map(companyWideRoles, personDto);
 
