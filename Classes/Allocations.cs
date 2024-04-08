@@ -105,7 +105,6 @@ namespace ChromeRiverService.Classes
                     {
                         _logger.LogError(ex, $"Exception thrown while processing allocation batch #{batchNum}");
                     }
-                    break;
                 }
 
                 _logger.LogInformation("Allocations Upsert Complete | Total Allocations Upserted: {NumUpserted} | Total Allocations Not Upserted: {NumNotUpserted}", NumUpserted, NumNotUpserted);
