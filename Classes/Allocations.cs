@@ -117,7 +117,7 @@ namespace ChromeRiverService.Classes
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex,"Allocations exception thrown after {NumUpserted} were upserted and {NumNotUpserted} were not sent or returned unsuccessful",NumUpserted,NumNotUpserted);
+                _logger.LogCritical(ex,"Allocations exception thrown after {NumUpserted} were upserted and {NumNotUpserted} were not sent or returned unsuccessful",NumUpserted,NumNotUpserted);
             }
         }
     }

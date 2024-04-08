@@ -169,7 +169,7 @@ namespace ChromeRiverService.Classes
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex,"People exception thrown after {NumUpserted} were upserted | {NumNotUpserted} were not sent or returned unsuccessful | {NumSetToDisabled} were set to disabled due to termination in the last {deactivationWidowLength} days", NumUpserted, NumNotUpserted, NumSetToDisabled, DeactivationWindowLength);
+                _logger.LogCritical(ex,"People exception thrown after {NumUpserted} were upserted | {NumNotUpserted} were not sent or returned unsuccessful | {NumSetToDisabled} were set to disabled due to termination in the last {deactivationWidowLength} days", NumUpserted, NumNotUpserted, NumSetToDisabled, DeactivationWindowLength);
             }
         }
     }

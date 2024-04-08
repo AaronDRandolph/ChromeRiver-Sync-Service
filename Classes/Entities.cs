@@ -114,7 +114,7 @@ namespace ChromeRiverService.Classes
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex,"Entity exception thrown after {NumUpserted} were upserted and {NumNotUpserted} were not sent or returned unsuccessful",NumUpserted,NumNotUpserted);
+                _logger.LogCritical(ex,"Entity exception thrown after {NumUpserted} were upserted and {NumNotUpserted} were not sent or returned unsuccessful",NumUpserted,NumNotUpserted);
             }
         }
     }
