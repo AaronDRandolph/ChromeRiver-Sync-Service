@@ -1,3 +1,4 @@
+-- Charter School Allocation Feed
 SELECT DISTINCT  
         --Allocation Name is made up of three parts with hyphens in between: fund code, function and expenditure account
         (SELECT TE.DESCRIPTION
