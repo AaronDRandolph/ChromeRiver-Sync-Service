@@ -4,9 +4,9 @@ The ChromeRiver Service is a .Net Core Service used to automatically synchronize
 # Getting Started
 1.  Clone the repository
 2.  Download all of the required packages with the dotnet CLI using the 'dotnet restore' command.
-3.  Set the following required environment variables
-    - IAM_PROD_CONNECTION_STRING 
-    - NCI_LOCAL_CONNECTION_STRING 
+3.  Set the following required environment variables with values provided in keepass.
+    - IAM_PROD_CONNECTION_STRING (keypass name: IAM Database Production Credentials)
+    - NCI_LOCAL_CONNECTION_STRING (keypass name: NCI_LOCAL_CONNECTION_STRING)
         - Note: this will need to be environment based, or handled through the pipelines
 
 # Build and Test
