@@ -55,7 +55,6 @@ namespace ChromeRiverService.Classes
 
                 IEnumerable<IEnumerable<Person>> peopleBatches = people.Chunk(batchSize);
                 IEnumerable<VwChromeRiverGetVendorInfo>? vendorInfo = await _nciCommonUnitOfWork.Vendors.GetAll() ?? throw new Exception("Call to get vendor returned null");
-                IEnumerable<VwGetChromeRiverRole>? companyWideRoles = await _nciCommonUnitOfWork.Roles.GetAll() ?? throw new Exception("Call to get role returned null");
 
                 foreach (IEnumerable<Person> peopleBatch in peopleBatches)
                 {
@@ -80,7 +79,6 @@ namespace ChromeRiverService.Classes
                                 {
                                     personDto = _mapper.Map<Person, PersonDto>(person);
                                     _mapper.Map(vendorInfo, personDto);
-                                    _mapper.Map(companyWideRoles, personDto);
 
                                     personDtos.Add(personDto);
                                 }
