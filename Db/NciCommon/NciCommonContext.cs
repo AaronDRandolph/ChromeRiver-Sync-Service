@@ -14,8 +14,6 @@ public partial class NciCommonContext(DbContextOptions<NciCommonContext> options
 
     public virtual DbSet<VwChromeRiverGetVendorInfo> VwChromeRiverGetVendorInfos { get; set; }
 
-    public virtual DbSet<VwGetChromeRiverRole> VwGetChromeRiverRole { get; set; }
-
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
            => optionsBuilder.UseSqlServer(_config.GetValue<string>("NCI_LOCAL_CONNECTION_STRING"));
 
@@ -99,22 +97,6 @@ public partial class NciCommonContext(DbContextOptions<NciCommonContext> options
             entity.Property(e => e.VendorCode2)
                 .HasMaxLength(20)
                 .IsUnicode(false);
-        });
-
-        modelBuilder.Entity<VwGetChromeRiverRole>(entity =>
-        {
-            entity
-                .HasNoKey()
-                .ToView("vwGetChromeRiverRole");
-
-            entity.Property(e => e.ApRole)
-                .HasMaxLength(13)
-                .IsUnicode(false)
-                .HasColumnName("AP_Role");
-            entity.Property(e => e.EmployeeId)
-                .HasMaxLength(15)
-                .IsUnicode(false)
-                .HasColumnName("EmployeeID");
         });
         modelBuilder.HasSequence("CountBy1", "Test");
 

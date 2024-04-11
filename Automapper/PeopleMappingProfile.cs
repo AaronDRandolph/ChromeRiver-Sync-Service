@@ -34,7 +34,6 @@ namespace ChromeRiverService.Automapper
                 .AfterMap((src, dest) => dest.PersonEntities = GetPersonEntities(src))
 
                 //ignores
-                .ForMember(dest => dest.PersonEntities, opt => opt.Ignore())
                 .ForMember(dest => dest.VendorCode1, opt => opt.Ignore())
                 .ForMember(dest => dest.VendorCode2, opt => opt.Ignore());
 
@@ -43,15 +42,6 @@ namespace ChromeRiverService.Automapper
                 .AfterMap((src, dest) => dest.VendorCode1 = GetPersonVendorInfo(src, dest)?.VendorCode1 ?? "")
                 .AfterMap((src, dest) => dest.VendorCode2 = GetPersonVendorInfo(src, dest)?.VendorCode2 ?? "");
 
-            // Only custom mapping, nothing automatic
-            CreateMap<IEnumerable<VwGetChromeRiverRole>, PersonDto>(MemberList.None)
-                .AfterMap((src, dest) => {
-                    PersonEntity? personRoleEntity = GetFirmWideRoleEntity(src, dest);
-                    if (personRoleEntity is not null)
-                    {
-                        dest.PersonEntities?.Add(personRoleEntity);
-                    }
-                });
         }
 
 
@@ -62,13 +52,13 @@ namespace ChromeRiverService.Automapper
         private static Person GetManager(Person person) => person.ManagerPeople?.FirstOrDefault()?.ManagerPerson ?? throw new ArgumentNullException("Manager object cannot be null");
         private static string GetUserName(Person person) => person.DomainEntityPeople?.FirstOrDefault()?.EntityName ?? throw new ArgumentNullException("Domain entity name cannot be null");
 
-        private static bool GetIsIT (Person person) => GetDepartment(person).DepartmentId.Equals((int)Codes.People.ITDepartment);
+        private static bool GetIsIT (Person person) => GetDepartment(person).DepartmentId.Equals((int)Codes.Department.IT);
 
         private static string GetJobTitle (Person person) => person.JobTitles.Where(jt => jt.EndDt == null)?.FirstOrDefault()?.Title ?? throw new ArgumentNullException(nameof(person.JobTitles));
 
-        private static string GetAccountStatus (Person person) => person.CodeIdemploymentStatus.Equals((int)Codes.People.ActiveEmployee) ? "Pending" : "Deleted";
+        private static string GetAccountStatus (Person person) => person.CodeIdemploymentStatus.Equals((int)Codes.EmploymentStatus.Active) ? "Pending" : "Deleted";
 
-        private static Department GetDepartment (Person person) => person.PersonPrograms?.Where(pp => pp.Program?.Department != null)?.FirstOrDefault()?.Program?.Department ?? throw new ArgumentNullException("A Person's department cannot be null");
+        private static Department GetDepartment (Person person) => person.PersonPrograms?.Where(pp => pp.Program?.Department != null)?.FirstOrDefault()?.Program?.Department ?? throw new ArgumentNullException("A person's department cannot be null");
 
         private static string GetManagerName(Person person)
         {
@@ -79,18 +69,92 @@ namespace ChromeRiverService.Automapper
 
         ICollection<PersonEntity> GetPersonEntities( Person person)
         {
-            string? departmentName = GetDepartment(person)?.DepartmentName;
-            return  
+            string departmentName = GetDepartment(person).DepartmentName;
+            string? appRole = GetFirmWideRoleEntity(person);
+
+            ICollection<PersonEntity> personEntities =   
             [ 
-                new PersonEntity() {RoleName = "Part Of", EntityTypeCode = "Division", EntityCode =  departmentName is not null ? divisionMapper[departmentName] : null}, 
+                new PersonEntity() {RoleName = "Part Of", EntityTypeCode = "Division", EntityCode =  divisionMapper[departmentName] is null ? throw new ArgumentNullException("A person's division cannot be null") : divisionMapper[departmentName] }, 
                 new PersonEntity() {RoleName = "Part Of", EntityTypeCode = "Department", EntityCode = departmentName}
             ];
+            
+            if ( appRole is not null)
+            {
+                personEntities.Add( new PersonEntity () {RoleName = appRole, EntityTypeCode = "Firmwide",EntityCode = "Firmwide"});
+            }
+            
+            return personEntities;
         }
 
-        private static PersonEntity? GetFirmWideRoleEntity( IEnumerable<VwGetChromeRiverRole> firmWideRoles, PersonDto personDto)
+        private static string? GetFirmWideRoleEntity(Person person)
         {
-            return  firmWideRoles.FirstOrDefault(role => role.EmployeeId == personDto.PersonUniqueId) is not null ?
-                new PersonEntity () {RoleName = firmWideRoles.FirstOrDefault(role => role.EmployeeId == personDto.PersonUniqueId)?.ApRole, EntityTypeCode = "Firmwide",EntityCode = "Firmwide"} : null;
+            string jobTitle = GetJobTitle(person);
+            Department department = GetDepartment(person);
+            string? appRole = null;
+
+            if (person.CodeIdemploymentStatus.Equals((int)Codes.EmploymentStatus.Active) || person.CodeIdemploymentStatus.Equals((int)Codes.EmploymentStatus.OnLeave))
+            {
+                if(department.DepartmentId.Equals((int)Codes.Department.WorkForceInitiatives))
+                {
+                    if(jobTitle.Contains("Accounts Payable"))
+                    {
+                        appRole = "APReview-FAPO";
+                    }
+
+                    else if(jobTitle.Contains("Unmet Needs"))
+                    {
+                        appRole = "DRSReview";
+                    }
+
+                    else if(jobTitle.Contains("Program Manager"))
+                    {
+                        appRole = "DRSReview";
+                    }
+
+                    else if(jobTitle.Contains("Manager"))
+                    {
+                        appRole = "APReview-FAPO";
+                    }
+                }
+
+                if(department.DepartmentId.Equals((int)Codes.Department.AccountingAndFinance))
+                {
+                    if(jobTitle.Contains("Manager") || jobTitle.Contains("Supervisor"))
+                    {
+                        appRole = "APApprover";
+                    }
+
+                    else if(jobTitle.Contains("Accounts Payable"))
+                    {
+                        appRole = "APReview";
+                    }
+
+                    else if(jobTitle.Contains("Unmet Needs"))
+                    {
+                        appRole = "DRSReview";
+                    }
+
+                    else if(jobTitle.Contains("Program Manager"))
+                    {
+                        appRole = "DRSReview";
+                    }
+                }
+
+                if(department.DepartmentId.Equals((int)Codes.Department.RegionalInitiatives))
+                {
+                    if(jobTitle.Contains("Unmet Needs"))
+                    {
+                        appRole = "DRSReview";
+                    }
+
+                    else if(jobTitle.Contains("Program Manager"))
+                    {
+                        appRole = "DRSReview";
+                    }
+                }
+            }
+
+            return appRole;
         }
 
         private static VwChromeRiverGetVendorInfo? GetPersonVendorInfo(IEnumerable<VwChromeRiverGetVendorInfo> vendorInfo, PersonDto person)
