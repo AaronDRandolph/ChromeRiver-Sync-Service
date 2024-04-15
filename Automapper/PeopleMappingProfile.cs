@@ -5,13 +5,15 @@ using ChromeRiverService.Classes.DTOs.Subclasses;
 using ChromeRiverService.Classes.Helpers;
 using ChromeRiverService.Db.NciCommon.DbViewsModels;
 using IAMRepository.Models;
+using IAMProgram = IAMRepository.Models.Program;
 
 namespace ChromeRiverService.Automapper
 {
     public class PersonMappingProfile : Profile
     {
 
-        readonly Dictionary<string, string> divisionMapper = JsonSerializer.Deserialize<Dictionary<string, string>>(File.ReadAllText(".\\Automapper\\JSON\\DivisionMappings.json")) ?? throw new Exception("Division mapper json file could not be found or could not be deserialized");
+        readonly static Dictionary<string, string> divisionMapper = JsonSerializer.Deserialize<Dictionary<string, string>>(File.ReadAllText(".\\Automapper\\JSON\\DivisionMappings.json")) ?? throw new Exception("Division mapper json file could not be found or could not be deserialized");
+        readonly static FirmWideRoleDictionary firmWideRoleDictionary = JsonSerializer.Deserialize<FirmWideRoleDictionary>(File.ReadAllText(".\\Automapper\\JSON\\FirmWideRoleDictionary.json")) ?? throw new Exception("Division mapper json file could not be found or could not be deserialized");
         public PersonMappingProfile()
         {
             //Configure the Mappings
@@ -59,6 +61,7 @@ namespace ChromeRiverService.Automapper
         private static string GetAccountStatus (Person person) => person.CodeIdemploymentStatus.Equals((int)Codes.EmploymentStatus.Active) ? "Pending" : "Deleted";
 
         private static Department GetDepartment (Person person) => person.PersonPrograms?.Where(pp => pp.Program?.Department != null)?.FirstOrDefault()?.Program?.Department ?? throw new ArgumentNullException("A person's department cannot be null");
+        private static IAMProgram GetProgram (Person person) => person.PersonPrograms?.FirstOrDefault()?.Program ?? throw new ArgumentNullException("A person's department cannot be null");
 
         private static string GetManagerName(Person person)
         {
@@ -70,7 +73,7 @@ namespace ChromeRiverService.Automapper
         ICollection<PersonEntity> GetPersonEntities( Person person)
         {
             string departmentName = GetDepartment(person).DepartmentName;
-            string? appRole = GetFirmWideRoleEntity(person);
+            IEnumerable<string>? appRoles = GetFirmWideRoles(person);
 
             ICollection<PersonEntity> personEntities =   
             [ 
@@ -78,83 +81,32 @@ namespace ChromeRiverService.Automapper
                 new PersonEntity() {RoleName = "Part Of", EntityTypeCode = "Department", EntityCode = departmentName}
             ];
             
-            if ( appRole is not null)
+            if (appRoles is not null)
             {
-                personEntities.Add( new PersonEntity () {RoleName = appRole, EntityTypeCode = "Firmwide",EntityCode = "Firmwide"});
+                foreach (string appRole in appRoles)
+                {
+                    personEntities.Add( new PersonEntity () {RoleName = appRole, EntityTypeCode = "Firmwide",EntityCode = "Firmwide"});
+                }
             }
             
             return personEntities;
         }
 
-        private static string? GetFirmWideRoleEntity(Person person)
+        private static IEnumerable<string>? GetFirmWideRoles(Person person)
         {
+            string programName = GetProgram(person).ProgramName;
             string jobTitle = GetJobTitle(person);
-            Department department = GetDepartment(person);
-            string? appRole = null;
+            IEnumerable<string>? appRoles = null;
 
-            if (person.CodeIdemploymentStatus.Equals((int)Codes.EmploymentStatus.Active) || person.CodeIdemploymentStatus.Equals((int)Codes.EmploymentStatus.OnLeave))
+            if (firmWideRoleDictionary.ContainsKey(programName))
             {
-                if(department.DepartmentId.Equals((int)Codes.Department.WorkForceInitiatives))
+                if (firmWideRoleDictionary[programName].ContainsKey(jobTitle)) 
                 {
-                    if(jobTitle.Contains("Accounts Payable"))
-                    {
-                        appRole = "APReview-FAPO";
-                    }
-
-                    else if(jobTitle.Contains("Unmet Needs"))
-                    {
-                        appRole = "DRSReview";
-                    }
-
-                    else if(jobTitle.Contains("Program Manager"))
-                    {
-                        appRole = "DRSReview";
-                    }
-
-                    else if(jobTitle.Contains("Manager"))
-                    {
-                        appRole = "APReview-FAPO";
-                    }
-                }
-
-                if(department.DepartmentId.Equals((int)Codes.Department.AccountingAndFinance))
-                {
-                    if(jobTitle.Contains("Manager") || jobTitle.Contains("Supervisor"))
-                    {
-                        appRole = "APApprover";
-                    }
-
-                    else if(jobTitle.Contains("Accounts Payable"))
-                    {
-                        appRole = "APReview";
-                    }
-
-                    else if(jobTitle.Contains("Unmet Needs"))
-                    {
-                        appRole = "DRSReview";
-                    }
-
-                    else if(jobTitle.Contains("Program Manager"))
-                    {
-                        appRole = "DRSReview";
-                    }
-                }
-
-                if(department.DepartmentId.Equals((int)Codes.Department.RegionalInitiatives))
-                {
-                    if(jobTitle.Contains("Unmet Needs"))
-                    {
-                        appRole = "DRSReview";
-                    }
-
-                    else if(jobTitle.Contains("Program Manager"))
-                    {
-                        appRole = "DRSReview";
-                    }
+                    appRoles = firmWideRoleDictionary[programName][jobTitle];   
                 }
             }
 
-            return appRole;
+            return appRoles;
         }
 
         private static VwChromeRiverGetVendorInfo? GetPersonVendorInfo(IEnumerable<VwChromeRiverGetVendorInfo> vendorInfo, PersonDto person)
