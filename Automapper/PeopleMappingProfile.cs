@@ -61,7 +61,7 @@ namespace ChromeRiverService.Automapper
         private static string GetAccountStatus (Person person) => person.CodeIdemploymentStatus.Equals((int)Codes.EmploymentStatus.Active) ? "Pending" : "Deleted";
 
         private static Department GetDepartment (Person person) => person.PersonPrograms?.Where(pp => pp.Program?.Department != null)?.FirstOrDefault()?.Program?.Department ?? throw new ArgumentNullException("A person's department cannot be null");
-        private static IAMProgram GetProgram (Person person) => person.PersonPrograms?.FirstOrDefault()?.Program ?? throw new ArgumentNullException("A person's department cannot be null");
+        private static IAMProgram GetProgram (Person person) => person.PersonPrograms?.FirstOrDefault()?.Program ?? throw new ArgumentNullException("A person's program cannot be null");
 
         private static string GetManagerName(Person person)
         {
