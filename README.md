@@ -1,20 +1,16 @@
 # Introduction 
-TODO: Give a short introduction of your project. Let this section explain the objectives or the motivation behind this project. 
+The ChromeRiver Service is a .Net Core Service used to automatically synchronize agency data in ChromeRiver. People data is collected from the IAM database, whereas entity and allocation data are collected from the on premise database. This service handles the activation and deactivation of each of these object types. For more details on ChromeRiver see the wiki section of the project on Azure DevOps. For more information of windows service using BackgroundService see https://learn.microsoft.com/en-us/dotnet/core/extensions/windows-service#rewrite-the-worker-class.  
 
 # Getting Started
-TODO: Guide users through getting your code up and running on their own system. In this section you can talk about:
-1.	Installation process
-2.	Software dependencies
-3.	Latest releases
-4.	API references
+1.  Clone the repository
+2.  Download all of the required packages with the dotnet CLI using the 'dotnet restore' command.
+3.  Set the following required environment variables with values provided in keepass.
+    - IAM_PROD_CONNECTION_STRING (keypass name: IAM Database Production Credentials)
+    - NCI_LOCAL_CONNECTION_STRING (keypass name: NCI_LOCAL_CONNECTION_STRING)
+        - Note: this will need to be environment based, or handled through the pipelines
 
 # Build and Test
-TODO: Describe and show how to build your code and run the tests. 
+Run in the appropriate environment or debug mode using Visual Studio. The service can also be run in debug mode using Visual Studio Code.  
 
 # Contribute
-TODO: Explain how other users and developers can contribute to make your code better. 
-
-If you want to learn more about creating good readme files then refer the following [guidelines](https://docs.microsoft.com/en-us/azure/devops/repos/git/create-a-readme?view=azure-devops). You can also seek inspiration from the below readme files:
-- [ASP.NET Core](https://github.com/aspnet/Home)
-- [Visual Studio Code](https://github.com/Microsoft/vscode)
-- [Chakra Core](https://github.com/Microsoft/ChakraCore)
+The data coming from the on-premise database is provided from a view. Copies of these views are found in Db/NciCommon/DbViewsVersionControl. The views should first be edited in the project before altering the view. Doingso will ensure version controlling a streamlined peer review process. If an alteration of a view leads to any change in the data structure a new scaffolding will be required. Each time you scaffold, you will need to include all the views in order for them to be present in the newly generated DBContext file. Also you will need to persist the IConfiguration implementation for gathering the connection string. By default, the scaffold command will hard code the connection string inside the new DBContext file, however there are options to suppress this and vary whether you are using the .Net CLI or the VS PMC. For instructions and details on scaffolding see https://learn.microsoft.com/en-us/ef/core/managing-schemas/scaffolding/?tabs=dotnet-core-cli.

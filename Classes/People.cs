@@ -73,11 +73,9 @@ namespace ChromeRiverService.Classes
                             }
                             else
                             {
-                                PersonDto? personDto = new();
-
                                 try
                                 {
-                                    personDto = _mapper.Map<Person, PersonDto>(person);
+                                    PersonDto personDto = _mapper.Map<Person, PersonDto>(person);
                                     _mapper.Map(vendorInfo, personDto);
 
                                     personDtos.Add(personDto);
@@ -91,6 +89,11 @@ namespace ChromeRiverService.Classes
 
                         }
 
+                        if (personDtos.Count == 0) 
+                        {
+                            throw new Exception($"Person batch #{batchNum} mapping completely failed");
+                        }
+                        
                         HttpResponseMessage? response = await _httpHelper.ExecutePostOrPatch<IEnumerable<PersonDto>>(upsertPeopleEndPoint, personDtos, isPatch: false);
 
                         if (response is not null)
@@ -162,7 +165,7 @@ namespace ChromeRiverService.Classes
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex,"People exception thrown after {NumUpserted} were upserted | {NumNotUpserted} were not sent or returned unsuccessful | {NumSetToDisabled} were set to disabled due to termination in the last {deactivationWidowLength} days", NumUpserted, NumNotUpserted, NumSetToDisabled, DeactivationWindowLength);
+                _logger.LogCritical(ex,"People exception thrown after {NumUpserted} were upserted | {NumNotUpserted} were not sent or returned unsuccessful | {NumSetToDisabled} were set to disabled due to termination in the last {deactivationWidowLength} days", NumUpserted, NumNotUpserted, NumSetToDisabled, DeactivationWindowLength);
             }
         }
     }
