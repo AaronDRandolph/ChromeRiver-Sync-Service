@@ -46,7 +46,6 @@ namespace ChromeRiverService.Automapper
 
         }
 
-
         private static string GetManagerID(Person person) => GetManager(person)?.EmployeeId ?? throw new ArgumentNullException(nameof(person.EmployeeId));
 
         private static string GetPrimaryEmailAddress(Person person) => $"{GetUserName(person)}@bakerripley.org";
