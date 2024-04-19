@@ -3,9 +3,9 @@ using Task = System.Threading.Tasks.Task;
 
 namespace ChromeRiverService;
 
-public class Worker(ISynchUnitOfWork synchUnitOfWork, ILogger logger) : BackgroundService
+public class Worker(ISynchUnitOfWork synchUnitOfWork, ILogger<Worker> logger) : BackgroundService
 {
-    private readonly ILogger _logger = logger;
+    private readonly ILogger<Worker> _logger = logger;
     private readonly ISynchUnitOfWork _synchUnitOfWork = synchUnitOfWork;
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
