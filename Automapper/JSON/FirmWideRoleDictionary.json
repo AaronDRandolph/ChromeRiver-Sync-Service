@@ -1,0 +1,10 @@
+{
+        "Finance & Accounting" : {
+                                    "Spec Accounts Payable" : ["APReview"],
+                                    "Mgr Accounts Payable" : ["APApprover"],
+                                    "Supv Accounts Payable" : ["APApprover"]
+                                 },
+        "FAPO" : {
+                    "Mgr Accounts Payable" : ["APApprover-FAPO","APReview-FAPO"]
+                 }
+}

@@ -40,11 +40,11 @@ namespace ChromeRiverService.Classes
                 IEnumerable<Person> people = await _iamUnitOfWork.People.GetAll(
                 filter: p => p.IsEmployee.HasValue && p.IsEmployee.Value &&
                                 (
-                                    p.CodeIdemploymentStatus == (int)Codes.People.ActiveEmployee ||
-                                    p.CodeIdemploymentStatus == (int)Codes.People.OnLeaveEmployee ||
-                                    p.CodeIdemploymentStatus == (int)Codes.People.SupspendedEmployee ||
-                                    p.CodeIdemploymentStatus == (int)Codes.People.RevokedEmployee ||
-                                    (p.CodeIdemploymentStatus == (int)Codes.People.TerminatedEmployee && p.EndDate > DateTime.Now.AddDays(-DeactivationWindowLength))
+                                    p.CodeIdemploymentStatus.Equals((int)Codes.EmploymentStatus.Active)     ||
+                                    p.CodeIdemploymentStatus.Equals((int)Codes.EmploymentStatus.OnLeave)    ||
+                                    p.CodeIdemploymentStatus.Equals((int)Codes.EmploymentStatus.Supspended) ||
+                                    p.CodeIdemploymentStatus.Equals((int)Codes.EmploymentStatus.Revoked)    ||
+                                    (p.CodeIdemploymentStatus.Equals((int)Codes.EmploymentStatus.Terminated) && p.EndDate > DateTime.Now.AddDays(-DeactivationWindowLength))
                                 ),
                 include: source => source
                                 .Include(p => p.PersonPrograms.Where(pp => pp.EndDt == null)).ThenInclude(pp => pp.Program).ThenInclude(p => p.Department)
@@ -55,7 +55,6 @@ namespace ChromeRiverService.Classes
 
                 IEnumerable<IEnumerable<Person>> peopleBatches = people.Chunk(batchSize);
                 IEnumerable<VwChromeRiverGetVendorInfo>? vendorInfo = await _nciCommonUnitOfWork.Vendors.GetAll() ?? throw new Exception("Call to get vendor returned null");
-                IEnumerable<VwGetChromeRiverRoles>? companyWideRoles = await _nciCommonUnitOfWork.Roles.GetAll() ?? throw new Exception("Call to get role returned null");
 
                 foreach (IEnumerable<Person> peopleBatch in peopleBatches)
                 {
@@ -78,7 +77,6 @@ namespace ChromeRiverService.Classes
                                 {
                                     PersonDto personDto = _mapper.Map<Person, PersonDto>(person);
                                     _mapper.Map(vendorInfo, personDto);
-                                    _mapper.Map(companyWideRoles, personDto);
 
                                     personDtos.Add(personDto);
                                 }

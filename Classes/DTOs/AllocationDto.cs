@@ -7,7 +7,7 @@ namespace ChromeRiverService.Classes.DTOs
         public string? ClientName  {get; set;}
         public string? ClientNumber  {get; set;}
         public string? Currency  {get; set;}
-        public string ClosedDate {get; set;} = "";
+        public string? ClosedDate {get; set;}
         public string? Type  {get; set;}
         public string? Locale  {get; set;}
         public string? OnSelect1EntityTypeCode  {get; set;}
