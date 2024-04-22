@@ -14,6 +14,7 @@ namespace ChromeRiverService.Automapper
 
         readonly static Dictionary<string, string> divisionMapper = JsonSerializer.Deserialize<Dictionary<string, string>>(File.ReadAllText(".\\Automapper\\JSON\\DivisionMappings.json")) ?? throw new Exception("Division mapper json file could not be found or could not be deserialized");
         readonly static FirmWideRoleDictionary firmWideRoleDictionary = JsonSerializer.Deserialize<FirmWideRoleDictionary>(File.ReadAllText(".\\Automapper\\JSON\\FirmWideRoleDictionary.json")) ?? throw new Exception("Division mapper json file could not be found or could not be deserialized");
+        readonly static Dictionary<string, string> superDelegateWhitelist = JsonSerializer.Deserialize<Dictionary<string, string>>(File.ReadAllText(".\\Automapper\\JSON\\SuperDelegateWhitelist.json")) ?? throw new Exception("Super delegate json file could not be found or could not be deserialized");
         public PersonMappingProfile()
         {
             //Configure the Mappings
@@ -27,9 +28,9 @@ namespace ChromeRiverService.Automapper
                 .ForMember(dest => dest.ReportsToPersonName, opt => opt.MapFrom(src => GetManagerName(src)))
                 .ForMember(dest => dest.Status, opt => opt.MapFrom(src => GetAccountStatus(src)))
                 .ForMember(dest => dest.PersonUniqueId, opt => opt.MapFrom(src => src.EmployeeId))
-                .ForMember(dest => dest.SuperDelegate, opt => opt.MapFrom(src => GetIsIT(src)))
+                .ForMember(dest => dest.SuperDelegate, opt => opt.MapFrom(src => IsIT(src) || IsOnSuperDelegateWhitelist(src)))
                 .ForMember(dest => dest.Username, opt => opt.MapFrom(src => GetUserName(src)))
-                .ForMember(dest => dest.AdminAccess, opt => opt.MapFrom(src => GetIsIT(src)))
+                .ForMember(dest => dest.AdminAccess, opt => opt.MapFrom(src => IsIT(src)))
                 .ForMember(dest => dest.DefaultMosaic, opt => opt.MapFrom(src => "Primary"))
                 .ForMember(dest => dest.Title, opt => opt.MapFrom(src => GetJobTitle(src)))
                 .ForMember(dest => dest.PrimaryCurrency, opt => opt.MapFrom(src => "USD"))
@@ -53,7 +54,9 @@ namespace ChromeRiverService.Automapper
         private static Person GetManager(Person person) => person.ManagerPeople?.FirstOrDefault()?.ManagerPerson ?? throw new ArgumentNullException("Manager object cannot be null");
         private static string GetUserName(Person person) => person.DomainEntityPeople?.FirstOrDefault()?.EntityName ?? throw new ArgumentNullException("Domain entity name cannot be null");
 
-        private static bool GetIsIT (Person person) => GetDepartment(person).DepartmentId.Equals((int)Codes.Department.IT);
+        private static bool IsIT (Person person) => GetDepartment(person).DepartmentId.Equals((int)Codes.Department.IT);
+
+        private static bool IsOnSuperDelegateWhitelist (Person person) => superDelegateWhitelist.ContainsKey(person.EmployeeId ?? throw new ArgumentNullException($"personID {person.PersonId} does not have an EmployeeId"));
 
         private static string GetJobTitle (Person person) => person.JobTitles.Where(jt => jt.EndDt == null)?.FirstOrDefault()?.Title ?? throw new ArgumentNullException(nameof(person.JobTitles));
 
