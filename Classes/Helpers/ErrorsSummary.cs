@@ -65,7 +65,12 @@ namespace ChromeRiverService.Classes.Helpers
 
         private static string GetAllErrorsCommandForLogHunter()
         {
-            return NumNonCritialErrors == 0 || NumCritialErrors == 0 ? "" : $"<div>Both critical and noncritical errors can be found with the following loghunter command line arguments: {BaseLogHunterQuery} --end \"{GetCurrentCentralTime()}\"  --level ERROR,FATAL</div>";
+            return !ContainsErrors() ? "" : $"<div>Both critical and noncritical errors can be found with the following loghunter command line arguments: {BaseLogHunterQuery} --end \"{GetCurrentCentralTime()}\"  --level ERROR,FATAL</div>";
+        }
+
+        public static bool ContainsErrors()
+        {
+            return NumNonCritialErrors + NumCritialErrors > 0 ;
         }
     }
 }

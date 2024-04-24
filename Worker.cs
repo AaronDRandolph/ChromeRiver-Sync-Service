@@ -17,7 +17,10 @@ public class Worker(ISynchUnitOfWork synchUnitOfWork, ILogger<Worker> logger, IC
             await _synchUnitOfWork.Entities().Upsert();
             await _synchUnitOfWork.People().Upsert();
             await _synchUnitOfWork.Allocations().Upsert();
-            await ErrorsSummary.SendEmail(_configuration);
+            if (ErrorsSummary.ContainsErrors())
+            {
+                await ErrorsSummary.SendEmail(_configuration);
+            }
 
             //terminate the service with no error code
             Environment.Exit(0);
