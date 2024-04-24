@@ -48,6 +48,7 @@ namespace ChromeRiverService.Classes
                             }
                             catch (Exception ex)
                             {
+                                ErrorsSummary.IncrementNumLowPriorityErrors();
                                 _logger.LogError(ex,"Expection thrown while mapping entity '{entityName}'",entity.EntityName);
                                 NumNotUpserted++;
                             }
@@ -82,6 +83,7 @@ namespace ChromeRiverService.Classes
                                         }
                                         else
                                         {
+                                            ErrorsSummary.IncrementNumLowPriorityErrors();
                                             EntityDto currentEntity = entityDtos.FirstOrDefault(dtos => dtos.EntityCode == entityResponse.EntityCode) ?? throw new Exception($"Entity with EntityCode {entityResponse.EntityCode} could not be mapped to a dto for error messaging");
                                             _logger.LogError("Error attempting to upsert an entity | Error: {errorMessage} | EntityDto: {dto}", entityResponse.ErrorMessage, JsonSerializer.Serialize(currentEntity));
                                             NumNotUpserted++;
@@ -89,6 +91,7 @@ namespace ChromeRiverService.Classes
                                     }
                                     catch (Exception ex)
                                     {
+                                        ErrorsSummary.IncrementNumLowPriorityErrors();
                                         _logger.LogError(ex, "Expection processing entity upsert responses");
                                     }
                                 }
@@ -100,13 +103,15 @@ namespace ChromeRiverService.Classes
                         }
                         else
                         {
+                            ErrorsSummary.IncrementNumLowPriorityErrors();
                             _logger.LogError("The response for entity batch #{batchNum} returned a null", batchNum);
                             NumNotUpserted += entityDtos.Count;
                         }
                     }
                     catch (Exception ex) 
                     {
-                        _logger.LogError(ex, "Exception thrown while processing entities batch #{batchNum}",batchNum);
+                        ErrorsSummary.IncrementNumHighPriorityErrors();
+                        _logger.LogCritical(ex, "Exception thrown while processing entities batch #{batchNum}",batchNum);
                     }
                 }
 
@@ -114,6 +119,7 @@ namespace ChromeRiverService.Classes
             }
             catch (Exception ex)
             {
+                ErrorsSummary.IncrementNumHighPriorityErrors();
                 _logger.LogCritical(ex,"Entity exception thrown after {NumUpserted} were upserted and {NumNotUpserted} were not sent or returned unsuccessful",NumUpserted,NumNotUpserted);
             }
         }

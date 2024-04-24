@@ -21,6 +21,7 @@ namespace ChromeRiverService.Classes.Helpers
 
                 if (!response.IsSuccessStatusCode)
                 {
+                    ErrorsSummary.IncrementNumLowPriorityErrors();
                     string responseMessage = await response.Content.ReadAsStringAsync();
                     _logger.LogError("Unsuccessful post with status code '{statusCode}' | Message: {message} | Payload : {jsonBody}",response.StatusCode, responseMessage, jsonBody);
                 }
@@ -29,7 +30,8 @@ namespace ChromeRiverService.Classes.Helpers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex,"Expection thrown while executing batch post for {class} with payload : {payload}", data.GetType().Name, jsonBody);
+                ErrorsSummary.IncrementNumHighPriorityErrors();
+                _logger.LogCritical(ex,"Expection thrown while executing batch post for {class} with payload : {payload}", data.GetType().Name, jsonBody);
                 return null;
             }
         }

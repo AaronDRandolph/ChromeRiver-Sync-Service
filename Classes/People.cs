@@ -31,7 +31,7 @@ namespace ChromeRiverService.Classes
         public async Task Upsert()
         {
             try
-            {   
+            {
                 string upsertPeopleEndPoint = _config.GetValue<string>("UPSERT_PEOPLE_ENDPOINT") ?? throw new Exception("UPSERT_PEOPLE_ENDPOINT is null");
                 string patchPeopleEndPoint = _config.GetValue<string>("PATCH_PERSON_ENDPOINT") ?? throw new Exception("PATCH_PEOPLE_ENDPOINT is null");
                 int batchSize = _config.GetValue<int>("UPSERT_PEOPLE_ENDPOINT_BATCH_LIMIT");
@@ -82,6 +82,7 @@ namespace ChromeRiverService.Classes
                                 }
                                 catch (Exception ex)
                                 {
+                                    ErrorsSummary.IncrementNumLowPriorityErrors();
                                     _logger.LogError(ex, "Exception thrown while mapping {FirstName} {LastName} with employeeID {EmployeeId}",person.FirstName,person.LastName,person.EmployeeId);
                                     NumNotUpserted++;
                                 }
@@ -125,10 +126,12 @@ namespace ChromeRiverService.Classes
                                         {
                                             if (personResponse.ErrorMessage.Contains("Person with username") && personResponse.ErrorMessage.Contains("already exists"))
                                             {
+                                                ErrorsSummary.IncrementNumLowPriorityErrors();
                                                 _logger.LogError("Person not updated because the username is already in use, this can happen if the person was manually created and there is a disconnect with the persons service object, or if there is duplicate entity names in the database | Name: {firstName} {lastName} | Employee ID: {employeeID}", currentPersonDto.FirstName, currentPersonDto.LastName, currentPersonDto.PersonUniqueId);
                                             }
                                             else
                                             {
+                                                ErrorsSummary.IncrementNumLowPriorityErrors();
                                                 _logger.LogError("Uncategorized person error | Error: {errorMessage}, PersonDto: {dto}", personResponse.ErrorMessage, JsonSerializer.Serialize(currentPersonDto));
                                             }
 
@@ -137,6 +140,7 @@ namespace ChromeRiverService.Classes
                                     }
                                     catch (Exception ex)
                                     {
+                                        ErrorsSummary.IncrementNumLowPriorityErrors();
                                         _logger.LogError(ex , "Expection processing person upsert responses");
                                     }
 
@@ -151,20 +155,24 @@ namespace ChromeRiverService.Classes
                         }
                         else
                         {
+                            ErrorsSummary.IncrementNumLowPriorityErrors();
                             _logger.LogError("The response for person batch #{batchNum} returned a null", batchNum);
                             NumNotUpserted += personDtos.Count;
                         }
                     }
                     catch (Exception ex)    
                     {
-                        _logger.LogError(ex,"Exception thrown while processing people batch #{batchNum}", batchNum);
+                        ErrorsSummary.IncrementNumHighPriorityErrors();
+                        _logger.LogCritical(ex,"Exception thrown while processing people batch #{batchNum}", batchNum);
                     }
                 }
+                throw new Exception("Bob");
 
                 _logger.LogInformation("People Upsert Complete | Total People Upserted: {NumUpserted} | Total People Not Upserted: {NumNotUpserted} | {NumSetToDisabled} were set to disabled due to termination in the last {deactivationWidowLength} days", NumUpserted, NumNotUpserted, NumSetToDisabled, DeactivationWindowLength);
             }
             catch (Exception ex)
             {
+                ErrorsSummary.IncrementNumHighPriorityErrors();
                 _logger.LogCritical(ex,"People exception thrown after {NumUpserted} were upserted | {NumNotUpserted} were not sent or returned unsuccessful | {NumSetToDisabled} were set to disabled due to termination in the last {deactivationWidowLength} days", NumUpserted, NumNotUpserted, NumSetToDisabled, DeactivationWindowLength);
             }
         }

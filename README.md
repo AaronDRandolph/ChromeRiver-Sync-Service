@@ -8,6 +8,8 @@ The ChromeRiver Service is a .Net Core Service used to automatically synchronize
     - IAM_PROD_CONNECTION_STRING (keypass name: IAM Database Production Credentials)
     - NCI_LOCAL_CONNECTION_STRING (keypass name: NCI_LOCAL_CONNECTION_STRING)
         - Note: this will need to be environment based, or handled through the pipelines
+    - MAIL_SERVER_PASSWORD (keypass name: Mail Server Credentials)
+        
 
 # Build and Test
 Run in the appropriate environment or debug mode using Visual Studio. The service can also be run in debug mode using Visual Studio Code.  

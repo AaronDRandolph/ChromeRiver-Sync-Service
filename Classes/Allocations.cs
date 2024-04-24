@@ -13,6 +13,7 @@ namespace ChromeRiverService.Classes
 {
     public class Allocations (INciCommonUnitOfWork nciCommonUnitOfWork, IConfiguration configuration, ILogger<Worker> logger, IHttpHelper httpHelper, IMapper mapper) : IAllocations
     {
+
         private readonly IConfiguration _config = configuration;
         private readonly ILogger<Worker> _logger = logger;
         private readonly INciCommonUnitOfWork _nciCommonUnitOfWork = nciCommonUnitOfWork; 
@@ -51,6 +52,7 @@ namespace ChromeRiverService.Classes
                             }
                             catch (Exception ex)
                             {
+                                ErrorsSummary.IncrementNumLowPriorityErrors();
                                 _logger.LogError(ex,"Exception thrown while mapping Allocation Number '{allocationNumber}'",allocation.AllocationNumber);
                                 NumNotUpserted++;
                             }
@@ -85,12 +87,14 @@ namespace ChromeRiverService.Classes
                                     {
                                         try
                                         {
+                                            ErrorsSummary.IncrementNumLowPriorityErrors();
                                             AllocationDto currentAllocation = allocationDtos.FirstOrDefault(dto => allocationResponse.AllocationId.Equals($"{dto.AllocationNumber}_{dto.Type}", StringComparison.InvariantCultureIgnoreCase)) ?? throw new Exception($"Allocation response with ID (Allocation.AllocationNumber_Allocation.Type) {allocationResponse.AllocationId} could not be mapped to a dto for error messaging");
                                             _logger.LogError("Upsert Type: Allocations | Result Type: All Allocations Upserted | Error: {ErrorMessage} | AllocationDto: {dto}", allocationResponse.ErrorMessage, JsonSerializer.Serialize(currentAllocation));
                                             NumNotUpserted++;
                                         }
                                         catch (Exception ex) 
                                         {
+                                            ErrorsSummary.IncrementNumLowPriorityErrors();
                                             _logger.LogError(ex, "Expection processing allocation upsert responses");
                                         }
                                     }
@@ -103,13 +107,15 @@ namespace ChromeRiverService.Classes
                         }
                         else
                         {
+                            ErrorsSummary.IncrementNumLowPriorityErrors();
                             _logger.LogError("The response for allocation batch #{batchNum} returned a null", batchNum);
                             NumNotUpserted += allocationDtos.Count;
                         }
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogError(ex, "Exception thrown while processing allocation batch #{batchNum}",batchNum);
+                        ErrorsSummary.IncrementNumHighPriorityErrors();
+                        _logger.LogCritical(ex, "Exception thrown while processing allocation batch #{batchNum}",batchNum);
                     }
                 }
 
@@ -117,6 +123,7 @@ namespace ChromeRiverService.Classes
             }
             catch (Exception ex)
             {
+                ErrorsSummary.IncrementNumHighPriorityErrors();
                 _logger.LogCritical(ex,"Allocations exception thrown after {NumUpserted} were upserted and {NumNotUpserted} were not sent or returned unsuccessful",NumUpserted,NumNotUpserted);
             }
         }

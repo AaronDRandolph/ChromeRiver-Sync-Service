@@ -1,12 +1,14 @@
+using ChromeRiverService.Classes.Helpers;
 using ChromeRiverService.Interfaces;
 using Task = System.Threading.Tasks.Task;
 
 namespace ChromeRiverService;
 
-public class Worker(ISynchUnitOfWork synchUnitOfWork, ILogger<Worker> logger) : BackgroundService
+public class Worker(ISynchUnitOfWork synchUnitOfWork, ILogger<Worker> logger, IConfiguration configuration) : BackgroundService
 {
     private readonly ILogger<Worker> _logger = logger;
     private readonly ISynchUnitOfWork _synchUnitOfWork = synchUnitOfWork;
+    private readonly IConfiguration _configuration = configuration;
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -15,6 +17,7 @@ public class Worker(ISynchUnitOfWork synchUnitOfWork, ILogger<Worker> logger) : 
             await _synchUnitOfWork.Entities().Upsert();
             await _synchUnitOfWork.People().Upsert();
             await _synchUnitOfWork.Allocations().Upsert();
+            await ErrorsSummary.SendEmail(_configuration);
 
             //terminate the service with no error code
             Environment.Exit(0);
