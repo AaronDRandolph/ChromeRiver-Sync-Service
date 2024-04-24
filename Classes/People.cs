@@ -132,7 +132,7 @@ namespace ChromeRiverService.Classes
                                             else
                                             {
                                                 ErrorsSummary.IncrementNumLowPriorityErrors();
-                                                _logger.LogError("Uncategorized person error | Error: {errorMessage}, PersonDto: {dto}", personResponse.ErrorMessage, JsonSerializer.Serialize(currentPersonDto));
+                                                _logger.LogError("Error attempting to upsert a person | Error: {errorMessage} | PersonDto: {dto}", personResponse.ErrorMessage, JsonSerializer.Serialize(currentPersonDto));
                                             }
 
                                             NumNotUpserted++;
@@ -166,8 +166,7 @@ namespace ChromeRiverService.Classes
                         _logger.LogCritical(ex,"Exception thrown while processing people batch #{batchNum}", batchNum);
                     }
                 }
-                throw new Exception("Bob");
-
+                
                 _logger.LogInformation("People Upsert Complete | Total People Upserted: {NumUpserted} | Total People Not Upserted: {NumNotUpserted} | {NumSetToDisabled} were set to disabled due to termination in the last {deactivationWidowLength} days", NumUpserted, NumNotUpserted, NumSetToDisabled, DeactivationWindowLength);
             }
             catch (Exception ex)

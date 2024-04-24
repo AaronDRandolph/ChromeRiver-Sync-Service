@@ -89,7 +89,7 @@ namespace ChromeRiverService.Classes
                                         {
                                             ErrorsSummary.IncrementNumLowPriorityErrors();
                                             AllocationDto currentAllocation = allocationDtos.FirstOrDefault(dto => allocationResponse.AllocationId.Equals($"{dto.AllocationNumber}_{dto.Type}", StringComparison.InvariantCultureIgnoreCase)) ?? throw new Exception($"Allocation response with ID (Allocation.AllocationNumber_Allocation.Type) {allocationResponse.AllocationId} could not be mapped to a dto for error messaging");
-                                            _logger.LogError("Upsert Type: Allocations | Result Type: All Allocations Upserted | Error: {ErrorMessage} | AllocationDto: {dto}", allocationResponse.ErrorMessage, JsonSerializer.Serialize(currentAllocation));
+                                            _logger.LogError("Error attempting to upsert an allocation | Error: {ErrorMessage} | AllocationDto: {dto}", allocationResponse.ErrorMessage, JsonSerializer.Serialize(currentAllocation));
                                             NumNotUpserted++;
                                         }
                                         catch (Exception ex) 
