@@ -27,7 +27,7 @@ public class Worker(ISynchUnitOfWork synchUnitOfWork, ILogger<Worker> logger, IC
             // When the stopping token is canceled, for example, a call made from services.msc,
             // we shouldn't exit with a non-zero exit code. In other words, this is expected...
         }
-               catch (Exception ex)
+        catch (Exception ex)
         {
             ErrorsSummary.IncrementNumHighPriorityErrors();
             _logger.LogCritical(ex, "{Message}", ex.Message);
