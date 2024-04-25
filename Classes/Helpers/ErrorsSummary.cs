@@ -27,8 +27,8 @@ namespace ChromeRiverService.Classes.Helpers
         public static async Task SendEmail(IConfiguration _configuration) 
         {
             var email = new MimeMessage();
-            email.From.Add(MailboxAddress.Parse("ITAppSupport@bakerripley.org"));
-            email.To.Add(MailboxAddress.Parse("ITAppSupport@bakerripley.org"));
+            email.From.Add(MailboxAddress.Parse(_configuration.GetValue<string>("MAIL_FROM_ADDRESS")));
+            email.To.Add(MailboxAddress.Parse(_configuration.GetValue<string>("MAIL_TO_ADDRESS")));
             email.Subject = "ChromeRiver Synch Service Error";
             email.Body = new TextPart(TextFormat.Html) 
             { 
