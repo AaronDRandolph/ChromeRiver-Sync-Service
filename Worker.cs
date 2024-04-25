@@ -33,7 +33,7 @@ public class Worker(ISynchUnitOfWork synchUnitOfWork, ILogger<Worker> logger, IC
         catch (Exception ex)
         {
             ErrorsSummary.IncrementNumHighPriorityErrors();
-            _logger.LogCritical(ex, "{Message}", ex.Message);
+            _logger.LogCritical(ex, "Unhandled exception thrown in one of the sync methods");
             await ErrorsSummary.SendEmail(_configuration);
 
 
