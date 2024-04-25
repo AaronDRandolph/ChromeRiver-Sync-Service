@@ -6,6 +6,10 @@
 **/bin
 **/obj
 
+# appsettings.json
+appsettings.Development.json
+appsettings.json
+
 # dotenv files
 .env
 

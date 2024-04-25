@@ -17,6 +17,7 @@ public class Worker(ISynchUnitOfWork synchUnitOfWork, ILogger<Worker> logger, IC
             await _synchUnitOfWork.Entities().Upsert();
             await _synchUnitOfWork.People().Upsert();
             await _synchUnitOfWork.Allocations().Upsert();
+            
             if (ErrorsSummary.ContainsErrors())
             {
                 await ErrorsSummary.SendEmail(_configuration);
