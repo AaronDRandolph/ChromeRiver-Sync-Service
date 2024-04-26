@@ -6,9 +6,11 @@
 **/bin
 **/obj
 
-# appsettings.json
+# sentive information json files
 appsettings.Development.json
 appsettings.json
+SuperDelegateWhitelist.json
+
 
 # dotenv files
 .env
